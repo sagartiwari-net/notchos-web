@@ -4,11 +4,12 @@ set -euo pipefail
 #   bash deploy/fetch-dmg.sh
 #   GH_TOKEN=ghp_xxx bash deploy/fetch-dmg.sh   # if the release URL is private
 
-VERSION=0.7.1
+VERSION=0.7.2
 TAG=v${VERSION}-staging
 NAME=NotchOS-${VERSION}.dmg
 OUT=/www/wwwroot/notch.sagartiwari.net/public/downloads/${NAME}
 LEGACY=/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.7.0.dmg
+PREV=/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.7.1.dmg
 REPO=sagartiwari-net/notchos-web
 PUBLIC_URL="https://github.com/${REPO}/releases/download/${TAG}/${NAME}"
 
@@ -37,7 +38,8 @@ chown www:www "$OUT"
 chmod 644 "$OUT"
 # Keep old email / bookmark links working.
 cp -f "$OUT" "$LEGACY"
-chown www:www "$LEGACY"
-chmod 644 "$LEGACY"
+cp -f "$OUT" "$PREV"
+chown www:www "$LEGACY" "$PREV"
+chmod 644 "$LEGACY" "$PREV"
 ls -lh "$(dirname "$OUT")"
 curl -sSIL "https://notch.sagartiwari.net/downloads/${NAME}" | head -15
