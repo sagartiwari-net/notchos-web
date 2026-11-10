@@ -1,7 +1,8 @@
 ---
 import Simple from '../layouts/Simple.astro';
 
-const dmgHref = '/downloads/NotchOS-0.7.0.dmg';
+const version = '0.7.1';
+const dmgHref = `/downloads/NotchOS-${version}.dmg`;
 ---
 
 <Simple title="Download NotchOS" description="Download NotchOS for Apple silicon Macs running macOS 26 or later.">
@@ -11,7 +12,7 @@ const dmgHref = '/downloads/NotchOS-0.7.0.dmg';
     purchase.
   </p>
   <p>
-    <a class="btn btn--primary" href={dmgHref} download>Download NotchOS 0.7.0 (.dmg)</a>
+    <a class="btn btn--primary" href={dmgHref} download>Download NotchOS {version} (.dmg)</a>
   </p>
   <p>
     <a class="btn btn--ghost" href="/trial">Start free trial (email me the link)</a>
