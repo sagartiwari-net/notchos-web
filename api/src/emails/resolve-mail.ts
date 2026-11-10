@@ -51,7 +51,7 @@ export async function resolveMailConfig(ctx: CoreContext): Promise<MailConfig> {
   const encPass = await setting(ctx, 'mail_smtp_pass');
   if (encPass !== null) {
     try {
-      pass = ctx.secretBox.decrypt(encPass, SMTP_PASS_AAD);
+      pass = ctx.secretBox.decrypt(encPass, SMTP_PASS_AAD).toString('utf8');
     } catch {
       pass = '';
     }
