@@ -1,0 +1,16 @@
+{
+  // Emits plain JavaScript to dist/ (npm run build). Relative ".ts" imports are rewritten
+  // to ".js". No source maps: dist/ must not point back at the sources.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": false,
+    "sourceMap": false,
+    "removeComments": false
+  },
+  "include": ["src"]
+}

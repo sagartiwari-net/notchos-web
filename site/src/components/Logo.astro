@@ -1,0 +1,14 @@
+---
+/** NotchOS mark: a display with its notch. Drawn for this site. */
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 22, class: className } = Astro.props;
+---
+
+<svg class={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+  <rect x="1.25" y="2.75" width="21.500" height="18.500" rx="5.250" stroke="#fff" stroke-opacity="0.92" stroke-width="1.500"></rect>
+  <path d="M6.500 2.750h11c-1.100 0-2 .900-2 2v1.200a2.800 2.800 0 0 1-2.800 2.800h-1.400a2.800 2.800 0 0 1-2.800-2.800v-1.200c0-1.100-.900-2-2-2z" fill="#fff"></path>
+</svg>

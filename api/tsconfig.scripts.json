@@ -1,0 +1,11 @@
+{
+  // Type checking for the standalone TypeScript in ../scripts (run with plain `node`).
+  // Those files sit outside any package.json, where Node decides "ES module" from the
+  // syntax; "module: Preserve" makes the checker accept the same.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "Preserve",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["../scripts/*.ts"]
+}

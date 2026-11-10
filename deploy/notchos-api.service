@@ -1,0 +1,20 @@
+[Unit]
+Description=NotchOS license API (notch.sagartiwari.net)
+After=network.target mariadb.service mysqld.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/notch.sagartiwari.net/api
+Environment=NOTCHOS_ENV_FILE=/www/server/notchos/api.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=3
+# Only loopback listen; nginx fronts HTTPS.
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

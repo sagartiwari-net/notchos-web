@@ -1,0 +1,91 @@
+---
+/**
+ * Calendar face: month grid on the left, the selected day and what is coming up on the right.
+ * Source: Lumen/Sources/AgendaChrome.swift (AgendaFace, MonthPane, EventRow, ReminderRow).
+ * The month is today's month (re-rendered in the browser by live.ts); the events and
+ * reminders are sample data written for this page.
+ */
+import Icon from '../../Icon.astro';
+import { monthModel, sampleAgenda } from '../../../lib/notch/calendar';
+
+const now = new Date();
+const month = monthModel(now, 'en-GB');
+const agenda = sampleAgenda(now, 'en-GB');
+const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+---
+
+<div class="cal">
+  <div class="cal__month">
+    <div class="cal__head">
+      <span class="cal__nav"><Icon name="chevron-left" size={13} weight={2.8} /></span>
+      <span class="cal__label" data-live="cal-month">{month.label}</span>
+      <span class="cal__week" data-live="cal-week">{month.week}</span>
+      <span class="cal__icon"><Icon name="calendar" size={15} /></span>
+      <span class="cal__nav"><Icon name="chevron-right" size={13} weight={2.8} /></span>
+    </div>
+    <div class="cal__weekdays">
+      {weekdays.map((day) => <span>{day}</span>)}
+    </div>
+    <div class="cal__grid" data-live="cal-grid" data-rows={month.rows}>
+      {
+        month.cells.map((cell) => (
+          <span
+            class="cal__cell"
+            data-today={cell?.today ? 'true' : undefined}
+            data-marked={cell?.marked ? 'true' : undefined}
+            data-empty={cell ? undefined : 'true'}
+          >
+            <span class="cal__num">{cell?.day ?? ''}</span>
+          </span>
+        ))
+      }
+    </div>
+  </div>
+  <span class="cal__rule"></span>
+  <div class="cal__day">
+    <div class="cal__selected" data-live="cal-selected">{agenda.selected}</div>
+    <div class="field">
+      <Icon name="plus-circle" size={14} />
+      <span class="field__ph">Add a reminder for this day…</span>
+    </div>
+    <div class="cal__buckets">
+      <div class="bucket">
+        <div class="bucket__title" data-live="cal-selected">{agenda.selected}</div>
+        <div class="evt">
+          <span class="evt__bar" style="--c: var(--color-accent)"></span>
+          <span class="evt__text">
+            <span class="evt__title">Design review</span>
+            <span class="evt__time" data-live="cal-today-event">{agenda.todayEvent}</span>
+          </span>
+          <span class="chip chip--secondary">Join</span>
+        </div>
+        <div class="evt evt--reminder">
+          <span class="evt__check"><span></span></span>
+          <span class="evt__text">
+            <span class="evt__title">Send the invoice</span>
+            <span class="evt__time" data-live="cal-today-reminder">{agenda.todayReminder}</span>
+          </span>
+          <span class="evt__list">Work</span>
+        </div>
+      </div>
+      <div class="bucket">
+        <div class="bucket__title">Upcoming</div>
+        <div class="evt">
+          <span class="evt__bar" style="--c: var(--color-plate-mint)"></span>
+          <span class="evt__text">
+            <span class="evt__title">Team lunch</span>
+            <span class="evt__time" data-live="cal-upcoming-event">{agenda.upcomingEvent}</span>
+          </span>
+        </div>
+        <div class="evt evt--reminder cal__extra">
+          <span class="evt__check"><span></span></span>
+          <span class="evt__text">
+            <span class="evt__title">Renew passport</span>
+            <span class="evt__time" data-live="cal-upcoming-reminder">{agenda.upcomingReminder}</span>
+          </span>
+          <span class="evt__list">Personal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

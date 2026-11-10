@@ -1,0 +1,108 @@
+---
+/**
+ * System face: CPU, network, memory, disk and battery cards.
+ * Source: Lumen/Sources/VitalChrome.swift (SystemFace, monitorCard, VitalSparkline, VitalBar).
+ * The readings are sample numbers written for this page, not measurements.
+ */
+import Plate from '../Plate.astro';
+import FaceHead from '../FaceHead.astro';
+import Icon from '../../Icon.astro';
+import { sparkPath } from '../../../lib/notch/spark';
+
+interface Props {
+  /** Id of the notch this face belongs to: keeps the SVG gradient ids unique per instance. */
+  uid: string;
+}
+
+const { uid } = Astro.props;
+const cpuId = `${uid}-spark-cpu`;
+const netId = `${uid}-spark-net`;
+
+const cpu = sparkPath([0.16, 0.18, 0.15, 0.2, 0.26, 0.22, 0.18, 0.21, 0.3, 0.42, 0.33, 0.24, 0.2, 0.22, 0.19, 0.17, 0.2, 0.24, 0.21, 0.18]);
+const down = sparkPath([0.1, 0.12, 0.1, 0.14, 0.3, 0.52, 0.6, 0.44, 0.3, 0.22, 0.18, 0.2, 0.34, 0.4, 0.28, 0.18, 0.14, 0.12, 0.16, 0.14]);
+const up = sparkPath([0.06, 0.07, 0.06, 0.08, 0.12, 0.18, 0.16, 0.1, 0.08, 0.07, 0.07, 0.09, 0.14, 0.12, 0.08, 0.07, 0.06, 0.07, 0.08, 0.07]);
+---
+
+<div class="system">
+  <FaceHead icon="gauge" title="System" tint="color-plate-sky" />
+  <div class="system__grid">
+    <div class="mcard" style="--tint: var(--n-tint-cpu)">
+      <div class="mcard__head">
+        <Plate icon="cpu" size={28} tint="n-tint-cpu" active />
+        <span class="mcard__title">CPU</span>
+        <span class="mcard__value">12%</span>
+      </div>
+      <div class="well">
+        <svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id={cpuId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--n-tint-cpu)" stop-opacity="0.32"></stop>
+              <stop offset="1" stop-color="var(--n-tint-cpu)" stop-opacity="0.02"></stop>
+            </linearGradient>
+          </defs>
+          <path d={cpu.fill} fill={`url(#${cpuId})`}></path>
+          <path d={cpu.line} class="well__line" stroke="var(--n-tint-cpu)"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="mcard" style="--tint: var(--n-tint-net)">
+      <div class="mcard__head">
+        <Plate icon="globe" size={28} tint="n-tint-net" active />
+        <span class="mcard__title">Network</span>
+        <span class="rates">
+          <span class="rate" style="--tint: var(--n-tint-net)"><Icon name="arrow-down" size={10} weight={3} /><b>1.2 MB/s</b></span>
+          <span class="rate" style="--tint: var(--n-tint-batt)"><Icon name="arrow-up" size={10} weight={3} /><b>84 KB/s</b></span>
+        </span>
+      </div>
+      <div class="well">
+        <svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id={netId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--n-tint-net)" stop-opacity="0.32"></stop>
+              <stop offset="1" stop-color="var(--n-tint-net)" stop-opacity="0.02"></stop>
+            </linearGradient>
+          </defs>
+          <path d={down.fill} fill={`url(#${netId})`}></path>
+          <path d={down.line} class="well__line" stroke="var(--n-tint-net)"></path>
+          <path d={up.line} class="well__line" stroke="rgb(255 255 255 / 0.4)"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="mcard" style="--tint: var(--n-tint-mem)">
+      <div class="mcard__head">
+        <Plate icon="memory" size={28} tint="n-tint-mem" active />
+        <span class="mcard__title">Memory</span>
+        <span class="mcard__value">9.8 GB</span>
+      </div>
+      <div class="mcard__note">6.2 GB free · 16 GB</div>
+      <div class="vbar"><i style="--p: 0.61"></i></div>
+    </div>
+    <div class="mcard" style="--tint: var(--n-tint-disk)">
+      <div class="mcard__head">
+        <Plate icon="drive" size={28} tint="n-tint-disk" active />
+        <span class="mcard__title">Disk</span>
+        <span class="mcard__value">54%</span>
+      </div>
+      <div class="mcard__note">228 GB free · 494 GB</div>
+      <div class="vbar"><i style="--p: 0.54"></i></div>
+    </div>
+    <div class="mcard mcard--battery" style="--tint: var(--color-plate-sky)">
+      <Plate icon="battery" size={28} tint="color-plate-sky" active />
+      <div class="batt">
+        <div class="batt__top">
+          <span class="batt__pct">82%</span>
+          <span class="batt__status">3h 40m left</span>
+        </div>
+        <div class="batt__meta">
+          <span>Health <b>96%</b></span>
+          <span>Cycles <b>212</b></span>
+        </div>
+      </div>
+      <div class="batt__cap">
+        <span class="batt__caplabel">Max capacity</span>
+        <span class="batt__capvalue">96%</span>
+        <div class="vbar"><i style="--p: 0.96"></i></div>
+      </div>
+    </div>
+  </div>
+</div>

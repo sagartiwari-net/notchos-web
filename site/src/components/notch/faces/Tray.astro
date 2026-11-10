@@ -1,0 +1,56 @@
+---
+/**
+ * Tray face: kept files, the Tray / Converted panes, the Nearby strip and the selection bar.
+ * Source: Lumen/Sources/SurfaceRoot.swift (TrayBody, TileFace, selectionBar, nearbyStrip).
+ * File names are sample data written for this page.
+ */
+import FaceHead from '../FaceHead.astro';
+
+const tiles = [
+  { kind: 'pdf', name: 'Brief.pdf' },
+  { kind: 'image', name: 'Hero-shot.png', selected: true },
+  { kind: 'text', name: 'Notes.txt' },
+  { kind: 'folder', name: 'Assets' },
+  { kind: 'sheet', name: 'Budget.csv' },
+];
+---
+
+<div class="tray">
+  <FaceHead icon="tray-fill" title="Tray" tint="color-plate-orange">
+    <span class="t-ter">5 items</span>
+    <span class="chip chip--primary">AirDrop all</span>
+    <span class="chip chip--secondary tray__wide">Move to folder</span>
+    <span class="chip chip--secondary">Clear</span>
+  </FaceHead>
+  <div class="chips">
+    <span class="chip is-on">Tray</span>
+    <span class="chip">Converted</span>
+  </div>
+  <div class="nearby">
+    <span class="nearby__dot"></span>
+    <span class="nearby__name">NotchOS Nearby</span>
+    <span class="nearby__pin">204617</span>
+    <span class="nearby__status">Waiting</span>
+    <svg class="nearby__chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9.4 5.8 6.2 6.2-6.2 6.2"></path></svg>
+  </div>
+  <div class="tiles">
+    {
+      tiles.map((tile) => (
+        <div class:list={['tile', tile.selected && 'is-selected']}>
+          <span class:list={['thumb', `thumb--${tile.kind}`]}>
+            {tile.kind === 'pdf' && <b>PDF</b>}
+            {tile.kind === 'sheet' && <b>CSV</b>}
+            {tile.kind === 'text' && <span class="thumb__lines" />}
+          </span>
+          <span class="tile__name">{tile.name}</span>
+        </div>
+      ))
+    }
+  </div>
+  <div class="tray__bar">
+    <span class="tray__count">1 selected</span>
+    <span class="chip chip--secondary">Deselect</span>
+    <span class="chip chip--primary chip--teal tray__wide">Send to Android</span>
+    <span class="tray__convert">Convert to&nbsp; ▾</span>
+  </div>
+</div>

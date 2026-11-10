@@ -1,0 +1,15 @@
+# dependencies and build output
+node_modules
+dist
+.astro
+
+# Reference screenshots of the real app. They show the owner's own desktop
+# and data, so they stay on this Mac and are never committed or shipped.
+reference/
+
+# Screenshots and measurements produced by scripts/shots.mjs and scripts/fps.mjs
+screenshots/
+
+# local noise
+.DS_Store
+*.log

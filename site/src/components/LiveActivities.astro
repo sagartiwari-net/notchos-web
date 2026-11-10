@@ -1,0 +1,87 @@
+---
+/**
+ * Section 9 item 4: closed-notch live activities. Six small instances of the same notch
+ * component, each closed with one chip in its ear: music bars, timer, download, battery,
+ * meeting countdown, phone transfer.
+ *
+ * What each chip does in the app is described from the source:
+ *   GlanceHub.swift (ranking, HUD flashes), TuneDeck, ClockDeck, TransferSense, VitalDeck,
+ *   AgendaDeck (five-minute lead, needs a join link), NearbyDeck (Android phone on the same Wi-Fi).
+ */
+import Notch from './notch/Notch.astro';
+import type { Activity } from '../lib/notch/tokens';
+
+const cards: Array<{ kind: Activity; title: string; text: string }> = [
+  {
+    kind: 'music',
+    title: 'Now playing',
+    text: 'Cover art and moving bars while Music, Spotify or a browser tab is playing.',
+  },
+  {
+    kind: 'timer',
+    title: 'Timers',
+    text: 'A running pomodoro, countdown or stopwatch keeps its time on the notch.',
+  },
+  {
+    kind: 'download',
+    title: 'Downloads',
+    text: 'A ring and a count while files are arriving in your Downloads folder.',
+  },
+  {
+    kind: 'battery',
+    title: 'Battery',
+    text: 'A short flash when you plug in, and again when the charge runs low.',
+  },
+  {
+    kind: 'meeting',
+    title: 'Next meeting',
+    text: 'Counts down the last five minutes before a meeting that has a join link.',
+  },
+  {
+    kind: 'transfer',
+    title: 'Phone to Mac',
+    text: 'Shows the file when an Android phone on the same Wi-Fi sends one over.',
+  },
+];
+---
+
+<section class="live wrap" id="live" aria-labelledby="live-title">
+  <div class="section-head">
+    <h2 id="live-title">Closed, it still keeps you posted.</h2>
+    <p>
+      When something is going on, the closed notch grows a small ear beside the camera and shows it there. Nothing
+      opens, nothing covers your work.
+    </p>
+  </div>
+  <ul class="live__grid">
+    {
+      cards.map((card) => (
+        <li class="lcard" data-live-card>
+          <div class="lcard__screen">
+            <div class="lcard__bar" aria-hidden="true" />
+            <Notch id={`live-${card.kind}`} faces={false} rightChips={[card.kind]} leftChips={[]} right={card.kind} />
+          </div>
+          <div class="lcard__body">
+            <h3 class="lcard__title">{card.title}</h3>
+            <p class="lcard__text">{card.text}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<script>
+  import { getNotch, mountAll } from '../lib/notch';
+
+  // Pointing at a card swells its notch, the same peek as on the stage.
+  mountAll();
+  document.querySelectorAll<HTMLElement>('[data-live-card]').forEach((card) => {
+    const notch = getNotch(card.querySelector('[data-notch]'));
+    if (!notch) return;
+    card.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'touch') notch.setState('peek');
+    });
+    card.addEventListener('pointerleave', () => notch.setState('closed'));
+  });
+</script>

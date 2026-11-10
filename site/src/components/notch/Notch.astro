@@ -1,0 +1,223 @@
+---
+/**
+ * The NotchOS island, built for the browser. One component, any number of instances.
+ *
+ *   <Notch id="stage-notch" interactive />                      full island, all ten faces
+ *   <Notch id="live-music" faces={false} right="music" />       closed lip with one live activity
+ *
+ * The markup here is inert: src/lib/notch/controller.ts positions every piece and drives all
+ * motion. Outside code talks to the controller, never to this DOM:
+ *
+ *   const notch = window.NotchOS.get('stage-notch');
+ *   notch.setState('open:tray');      // 'closed' | 'peek' | 'open:<face>'
+ *   notch.setActivity({ right: 'timer' });
+ *
+ * State is mirrored on the root as attributes so it can be observed and tested:
+ *   data-state="closed | peek | open:<face>"   data-face="<face>"   data-left / data-right
+ *   data-mode="wide | compact"                 data-busy="true" while a morph runs
+ *   data-kind="island | lip"                   full island, or closed-only lip (faces={false})
+ *
+ * How the island is put together in the app (read-only reference):
+ *   Lumen/Sources/SurfaceRoot.swift   MorphingLip, lipPath, tabBar, chrome
+ *   Lumen/Sources/ScreenShell.swift   lipBox, morphDraw
+ *   Lumen/Sources/GlassFill.swift     fills, stroke opacity, soft specular
+ */
+import Icon from '../Icon.astro';
+import Plate from './Plate.astro';
+import Wing from './Wing.astro';
+import Home from './faces/Home.astro';
+import Tray from './faces/Tray.astro';
+import Clipboard from './faces/Clipboard.astro';
+import Calendar from './faces/Calendar.astro';
+import Tasks from './faces/Tasks.astro';
+import Timers from './faces/Timers.astro';
+import Prompter from './faces/Prompter.astro';
+import System from './faces/System.astro';
+import Tools from './faces/Tools.astro';
+import AI from './faces/AI.astro';
+import type { IconName } from '../../lib/icons';
+import {
+  ACTIVITIES,
+  FACES,
+  FACE_LABEL,
+  ISLAND_TABS,
+  MODE_SPECS,
+  type Activity,
+  type Face,
+} from '../../lib/notch/tokens';
+
+interface Props {
+  id: string;
+  /** Render the open faces. false gives a closed-only lip (much less markup). */
+  faces?: boolean;
+  /** Hover peeks, click opens, click outside or Escape closes. */
+  interactive?: boolean;
+  /** Draw the camera housing behind the lip. */
+  housing?: boolean;
+  /** Chips this instance can show in each ear. */
+  rightChips?: readonly Activity[];
+  leftChips?: readonly Activity[];
+  /** Chips shown at first paint. */
+  right?: Activity;
+  left?: Activity;
+  /** State at first paint. */
+  state?: 'closed' | 'peek' | `open:${Face}`;
+  face?: Face;
+  /** Force a layout instead of measuring the host. */
+  mode?: 'wide' | 'compact';
+  class?: string;
+}
+
+const {
+  id,
+  faces = true,
+  interactive = false,
+  housing = true,
+  rightChips = ACTIVITIES,
+  leftChips = ['shelf'] as const,
+  right,
+  left,
+  state = 'closed',
+  face = 'home',
+  mode,
+  class: className,
+} = Astro.props;
+
+const TAB_ICON: Record<Face, IconName> = {
+  home: 'house',
+  tray: 'tray-fill',
+  tools: 'grid',
+  timers: 'timer',
+  prompter: 'prompter',
+  tasks: 'checklist',
+  calendar: 'calendar',
+  clipboard: 'clipboard',
+  system: 'gauge',
+  ai: 'sparkles',
+};
+
+const pieces = ['core', 'floor', 'corner-l', 'corner-r', 'flare-l', 'flare-r'];
+const wide = MODE_SPECS.wide.faces;
+const compact = MODE_SPECS.compact.faces;
+---
+
+<div
+  class:list={['notch', className]}
+  id={id}
+  data-notch
+  data-state={state}
+  data-face={face}
+  data-left={left ?? 'none'}
+  data-right={right ?? 'none'}
+  data-kind={faces ? 'island' : 'lip'}
+  data-interactive={interactive ? 'true' : 'false'}
+  data-mode-lock={mode}
+>
+  {/* The shadow, the open glass tone and the gloss only show on an open island. */}
+  {faces && <div class="notch__shadow" data-part="shadow" aria-hidden="true" />}
+  <div class="notch__lip notch__lip--stroke" data-lip="stroke" aria-hidden="true">
+    {pieces.map((piece) => <i data-piece={piece} />)}
+  </div>
+  {
+    faces && (
+      <div class="notch__lip notch__lip--open" data-lip="open" aria-hidden="true">
+        {pieces.map((piece) => (
+          <i data-piece={piece} />
+        ))}
+      </div>
+    )
+  }
+  <div class="notch__lip notch__lip--closed" data-lip="closed" aria-hidden="true">
+    {pieces.map((piece) => <i data-piece={piece} />)}
+  </div>
+  {faces && <div class="notch__gloss" data-part="gloss" aria-hidden="true" />}
+
+  {
+    faces && (
+      <div class="notch__clip" data-clip="b" aria-hidden="true">
+        <div class="notch__clip" data-clip="l">
+          <div class="notch__clip" data-clip="r">
+            <div class="notch__content" data-part="content">
+              <div class="notch__chrome" data-part="chrome">
+                <div class="notch__tabs">
+                  {ISLAND_TABS.map((tab) => (
+                    <span class="itab" data-island-tab={tab} title={FACE_LABEL[tab]}>
+                      <Plate icon={TAB_ICON[tab]} size={28} />
+                      <span class="itab__on" data-tab-on={tab}>
+                        <Plate icon={TAB_ICON[tab]} size={28} active />
+                      </span>
+                    </span>
+                  ))}
+                </div>
+                <div class="notch__tools" data-part="tools">
+                  <span class="notch__tool">
+                    <Icon name="gear" size={15} weight={1.9} />
+                  </span>
+                  <span class="notch__tool notch__tool--pin">
+                    <Icon name="pin" size={16} weight={1.9} />
+                  </span>
+                </div>
+                <div class="notch__grip" data-part="grip">
+                  <Icon name="grip" size={15} weight={2.6} />
+                </div>
+                {FACES.map((name) => (
+                  <div
+                    class:list={['face', `face--${name}`]}
+                    data-face-body={name}
+                    style={`--h-wide:${wide[name]}px;--h-compact:${compact[name]}px`}
+                  >
+                    {name === 'home' && <Home />}
+                    {name === 'tray' && <Tray />}
+                    {name === 'clipboard' && <Clipboard />}
+                    {name === 'calendar' && <Calendar />}
+                    {name === 'tasks' && <Tasks />}
+                    {name === 'timers' && <Timers />}
+                    {name === 'prompter' && <Prompter />}
+                    {name === 'system' && <System uid={id} />}
+                    {name === 'tools' && <Tools />}
+                    {name === 'ai' && <AI />}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  {
+    housing && (
+      <div class="notch__housing" aria-hidden="true">
+        <span class="notch__lens" />
+      </div>
+    )
+  }
+
+  <div class="notch__wings" data-part="wings" aria-hidden="true">
+    <div class="notch__ear" data-ear="left">
+      {leftChips.map((kind) => <Wing kind={kind} />)}
+    </div>
+    <div class="notch__ear" data-ear="right">
+      {rightChips.map((kind) => <Wing kind={kind} />)}
+    </div>
+  </div>
+
+  {
+    interactive && (
+      <button
+        type="button"
+        class="notch__hit"
+        data-part="hit"
+        aria-label="Open the notch preview"
+        aria-expanded="false"
+      />
+    )
+  }
+</div>
+
+<script>
+  import { mountAll } from '../../lib/notch';
+
+  mountAll();
+</script>

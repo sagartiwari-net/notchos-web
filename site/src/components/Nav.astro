@@ -1,0 +1,33 @@
+---
+/**
+ * Section 9 item 1: nav, plus the facts strip that hangs from the top edge like a notch.
+ *
+ * The strip is "Apple silicon · macOS 26+ · price". The price is not decided yet (WEB plan
+ * decision 12), so its slot stays in the markup, hidden, and the strip reads fine without it.
+ * S2 fills [data-fact="price"] from /api/pay/config and removes `hidden`.
+ */
+import Logo from './Logo.astro';
+---
+
+<header class="nav">
+  <div class="factnotch" role="note" aria-label="Requirements">
+    <span>Apple silicon</span>
+    <span class="factnotch__dot" aria-hidden="true"></span>
+    <span>macOS 12 or later</span>
+    <span class="factnotch__dot" data-fact-sep="price" aria-hidden="true" hidden></span>
+    <span data-fact="price" hidden></span>
+  </div>
+  <div class="wrap nav__row">
+    <a class="brand" href="/" aria-label="NotchOS home">
+      <Logo class="brand__mark" />
+      <span>NotchOS</span>
+    </a>
+    <nav class="nav__links" aria-label="Main">
+      <a class="nav__link" href="/#stage">Preview</a>
+      <a class="nav__link nav__link--extra" href="/#features">Features</a>
+      <a class="nav__link" href="/#pricing">Pricing</a>
+      <a class="nav__link nav__link--extra" href="/#faq">FAQ</a>
+      <a class="btn btn--primary btn--small nav__cta" href="/download">Download</a>
+    </nav>
+  </div>
+</header>

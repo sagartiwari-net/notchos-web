@@ -1,0 +1,107 @@
+/*
+ * NotchOS design tokens for the web.
+ *
+ * Ported by hand from the Mac app so the page and the app are one family.
+ * Points in the app are CSS pixels here (1pt = 1px). When the app changes, change these.
+ *
+ *   Lumen/Sources/DesignTokens.swift   NotchSpace, NotchRadius, NotchHairline, NotchIconSize,
+ *                                      NotchType, NotchColor, NotchMotion
+ *   Lumen/Sources/GlassFill.swift      GlassStyle tint and stroke opacities, soft specular
+ *   Lumen/Sources/ToolCatalog.swift    ToolAccent (icon plate tints)
+ *   Lumen/Sources/VitalChrome.swift    System face tints
+ *   Lumen/Sources/AgendaChrome.swift   Calendar accent
+ *
+ * The motion durations and the island geometry live in src/lib/notch/tokens.ts,
+ * because GSAP needs them as numbers.
+ */
+
+/* `static`: emit every token even when only an inline style uses it (plate tints). */
+@theme static {
+  /* The app uses the system font (Font.system). Same here: no web fonts, no CDN. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Font.system(design: .rounded) */
+  --font-rounded:
+    ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  /* Font.system(design: .monospaced) */
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* NotchColor: cool white on glass */
+  --color-ink: rgb(255 255 255 / 0.94); /* textPrimary */
+  --color-ink-2: rgb(255 255 255 / 0.5); /* textSecondary */
+  --color-ink-3: rgb(255 255 255 / 0.35); /* textTertiary */
+  --color-fill-idle: rgb(255 255 255 / 0.1); /* fillIdle */
+  --color-fill-active: rgb(255 255 255 / 0.18); /* fillActive */
+  --color-symbol: rgb(255 255 255 / 0.7); /* symbolIdle */
+  --color-symbol-active: rgb(255 255 255 / 0.95); /* symbolActive */
+
+  /* The one restrained accent. AgendaChrome accent = Color(0.22, 0.55, 1.0). */
+  --color-accent: #388cff;
+  --color-accent-soft: rgb(56 140 255 / 0.18); /* fillAccentSoft */
+
+  /* ToolAccent: icon plates only, never page chrome */
+  --color-plate-sky: #59b8ff;
+  --color-plate-teal: #40d9c7;
+  --color-plate-mint: #66ebb3;
+  --color-plate-orange: #ff9e47;
+  --color-plate-amber: #ffc747;
+  --color-plate-rose: #ff6b85;
+  --color-plate-violet: #b88cff;
+  --color-plate-indigo: #738cff;
+  --color-plate-pink: #ff73b8;
+  --color-plate-yellow: #ffe059;
+
+  /* Page surfaces: near-black, glass plates, hairline borders */
+  --color-page: #060607;
+  --color-page-raised: #0c0c0e;
+  --color-plate: rgb(255 255 255 / 0.045);
+  --color-plate-strong: rgb(255 255 255 / 0.08);
+  --color-hairline: rgb(255 255 255 / 0.1);
+  --color-hairline-strong: rgb(255 255 255 / 0.18); /* GlassStyle.island stroke */
+  --color-copy: rgb(255 255 255 / 0.72);
+  --color-copy-quiet: rgb(255 255 255 / 0.56);
+
+  /* NotchRadius */
+  --radius-chip: 10px;
+  --radius-tile: 14px;
+  --radius-card: 16px;
+  --radius-sheet: 18px;
+}
+
+:root {
+  /* NotchSpace */
+  --n-space-xs: 6px;
+  --n-space-sm: 8px;
+  --n-space-md: 12px;
+  --n-space-lg: 16px;
+  --n-space-xl: 20px;
+
+  /* NotchHairline.width */
+  --n-hairline: 0.8px;
+
+  /* GlassStyle: tint over the material, stroke on the outline */
+  --n-glass-island-stroke: 0.18;
+  --n-glass-card-stroke: 0.2;
+  --n-glass-chip-stroke: 0.14;
+
+  /* NotchIconSize */
+  --n-plate-compact: 28px;
+  --n-plate-regular: 32px;
+  --n-plate-large: 36px;
+
+  /* System face tints (VitalChrome) */
+  --n-tint-cpu: #61bdff;
+  --n-tint-mem: #ffcc52;
+  --n-tint-net: #47e0c7;
+  --n-tint-disk: #9e8cff;
+  --n-tint-batt: #6bebb8;
+  --n-tint-batt-low: #ff7385;
+
+  /* Island fill. Closed sits on the camera housing, so it is black like the housing.
+     Open is the denser "card" glass, read off the reference screenshots. */
+  --n-lip-closed: #000;
+  --n-lip-open: #19191b;
+  --n-housing: #000;
+}

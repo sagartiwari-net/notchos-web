@@ -1,0 +1,82 @@
+---
+/**
+ * Prompter face: script library, editor, reading options.
+ * Source: Lumen/Sources/ScriptChrome.swift (PrompterFace: library / editor / appearance).
+ * The scripts are sample text written for this page.
+ */
+import FaceHead from '../FaceHead.astro';
+
+const scripts = [
+  { title: 'Product intro', meta: '84 words · 0:32', on: true },
+  { title: 'Weekly update', meta: '142 words · 0:54' },
+  { title: 'Podcast cold open', meta: '63 words · 0:24' },
+];
+const steps = [
+  ['Speed', '160'],
+  ['Size', '21'],
+  ['Space', '2'],
+  ['Width', '420'],
+];
+const toggles = [
+  { label: 'Mirror', on: false },
+  { label: 'Focus line', on: true },
+  { label: 'Voice', on: false },
+];
+---
+
+<div class="prompter">
+  <FaceHead icon="prompter" title="Prompter" tint="color-plate-sky">
+    <span class="chip">AI</span>
+  </FaceHead>
+  <div class="prompter__cols">
+    <div class="prompter__library">
+      <div class="prompter__scripts">
+        {
+          scripts.map((script) => (
+            <div class:list={['script', script.on && 'is-on']}>
+              <span class="script__title">{script.title}</span>
+              <span class="script__meta">{script.meta}</span>
+            </div>
+          ))
+        }
+      </div>
+      <span class="chip chip--primary">New</span>
+    </div>
+    <div class="prompter__editor">
+      <div class="prompter__name">Product intro</div>
+      <div class="prompter__text fade-bottom">
+        <p>Hi, and thanks for watching. In the next minute I will show you the one place on my Mac I reach for all day.</p>
+        <p>It sits right under the camera. Files I am working with, the last few things I copied, my next meeting and a timer are all one glance away.</p>
+        <p>These lines scroll just below the lens, so I can keep looking at you while I read. If I pause, the page waits for me.</p>
+        <p>Let me open it and walk you through each part.</p>
+      </div>
+    </div>
+    <div class="prompter__options">
+      <span class="startbtn">Start reading</span>
+      <span class="prompter__eta">~0:32 · 160 wpm</span>
+      {
+        steps.map(([label, value]) => (
+          <div class="steprow">
+            <span class="steprow__label">{label}</span>
+            <i class="tiny">−</i>
+            <span class="steprow__value">{value}</span>
+            <i class="tiny">+</i>
+          </div>
+        ))
+      }
+      <div class="aligns">
+        <span class="is-on">L</span>
+        <span>C</span>
+        <span>R</span>
+      </div>
+      {
+        toggles.map((toggle) => (
+          <div class:list={['toggle', toggle.on && 'is-on']}>
+            <span>{toggle.label}</span>
+            <i class="toggle__switch" />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</div>

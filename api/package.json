@@ -1,0 +1,43 @@
+{
+  "name": "notchos-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NotchOS license server: app-facing license routes, CLI and migrations",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.scripts.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cli": "node src/cli/index.ts",
+    "db:migrate": "node src/cli/index.ts db:migrate",
+    "db:status": "node src/cli/index.ts db:status",
+    "db:reset": "node src/cli/index.ts db:reset",
+    "license:create": "node src/cli/index.ts license:create",
+    "license:revoke": "node src/cli/index.ts license:revoke",
+    "license:expire": "node src/cli/index.ts license:expire",
+    "license:reset-seat": "node src/cli/index.ts license:reset-seat",
+    "license:list": "node src/cli/index.ts license:list",
+    "email:list": "node src/cli/index.ts email:list",
+    "email:preview": "node src/cli/index.ts email:preview",
+    "email:preview-all": "node src/cli/index.ts email:preview-all",
+    "email:send-test": "node src/cli/index.ts email:send-test",
+    "gen-signing-key": "node ../scripts/gen-signing-key.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.12.8",
+    "mariadb": "^3.5.5",
+    "nodemailer": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/nodemailer": "^8.0.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

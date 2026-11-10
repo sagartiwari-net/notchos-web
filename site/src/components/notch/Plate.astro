@@ -1,0 +1,31 @@
+---
+/**
+ * ToolPlate (Lumen/Sources/ToolChrome.swift): the squircle icon plate used by the island tabs,
+ * the face headers and the Tools grid. Radius = size x 0.28. A tint gives the coloured plate;
+ * without one it is the cool white plate.
+ */
+import Icon from '../Icon.astro';
+import type { IconName } from '../../lib/icons';
+
+interface Props {
+  icon: IconName;
+  /** 28 compact, 32 regular, 36 large (NotchIconSize). */
+  size?: 28 | 32 | 36 | 24;
+  /** A --color-plate-* or --n-tint-* custom property name without the leading dashes. */
+  tint?: string;
+  active?: boolean;
+  class?: string;
+}
+
+const { icon, size = 32, tint, active = false, class: className } = Astro.props;
+// NotchIconSize.symbolPoints: 13 / 14 / 16 pt symbols. Our 24-grid glyphs carry more padding
+// than SF Symbols, so they are drawn a little larger to land on the same visual size.
+const glyph = size <= 24 ? 13 : size <= 28 ? 16 : size <= 32 ? 17 : 19;
+---
+
+<span
+  class:list={['plate', tint && 'plate--tint', active && 'is-active', className]}
+  style={`--s:${size}px;${tint ? `--tint:var(--${tint});` : ''}`}
+>
+  <Icon name={icon} size={glyph} />
+</span>

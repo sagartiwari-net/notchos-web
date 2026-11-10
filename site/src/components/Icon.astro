@@ -1,0 +1,29 @@
+---
+import { ICONS, type IconName } from '../lib/icons';
+
+interface Props {
+  name: IconName;
+  size?: number;
+  class?: string;
+  /** Stroke width on the 24 grid. 2 reads like the app's semibold symbols. */
+  weight?: number;
+}
+
+const { name, size = 16, class: className, weight = 2 } = Astro.props;
+const body = ICONS[name];
+---
+
+<svg
+  class:list={['icon', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={weight}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  set:html={body}
+/>

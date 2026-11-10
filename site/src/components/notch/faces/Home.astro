@@ -1,0 +1,67 @@
+---
+/**
+ * Home face: Today only (music, date, weather) plus the timezone strip.
+ * Source: Lumen/Sources/TuneChrome.swift (HomeFace, TuneCard, SeekStrip, PulseBars) and
+ *         Lumen/Sources/SystemToolSheets.swift (TimezoneStrip).
+ * All content is sample data written for this page. Date and clocks are filled in live
+ * by src/lib/notch/live.ts.
+ */
+import Icon from '../../Icon.astro';
+
+const zones = [
+  { label: 'London', tz: 'Europe/London' },
+  { label: 'New York', tz: 'America/New_York' },
+  { label: 'Tokyo', tz: 'Asia/Tokyo' },
+];
+---
+
+<div class="home">
+  <div class="home__today">
+    <div class="tune">
+      <div class="tune__cover" aria-hidden="true">
+        <span class="tune__sun"></span>
+        <span class="tune__sea"></span>
+      </div>
+      <div class="tune__meta">
+        <div class="tune__title">Open Water</div>
+        <div class="tune__sub">Northfield · Tide Tables</div>
+        <div class="seek">
+          <div class="seek__track"><span class="seek__fill" data-live="seek-fill"></span></div>
+          <div class="seek__times">
+            <span data-live="seek-elapsed">1:12</span>
+            <span data-live="seek-left">-2:36</span>
+          </div>
+        </div>
+        <div class="tune__controls">
+          <span class="tune__btn"><Icon name="backward" size={13} /></span>
+          <span class="tune__btn tune__btn--play"><Icon name="pause" size={14} /></span>
+          <span class="tune__btn"><Icon name="forward" size={13} /></span>
+          <span class="bars bars--lg" data-bars><i></i><i></i><i></i></span>
+        </div>
+      </div>
+    </div>
+    <span class="home__rule"></span>
+    <div class="home__date">
+      <div class="home__day" data-live="date-short">Tue 10 Nov</div>
+      <div class="home__next">Design review · 3:00 PM</div>
+      <div class="home__weather">
+        <Icon name="sun" size={15} class="home__sun" />
+        <span class="home__temp">21°</span>
+      </div>
+      <div class="home__place">Clear · Lisbon</div>
+    </div>
+  </div>
+  <div class="zones">
+    {
+      zones.map((zone, index) => (
+        <>
+          {index > 0 && <span class="zones__dot">·</span>}
+          <span class="zones__city">{zone.label}</span>
+          <span class="zones__time" data-live="zone" data-tz={zone.tz}>
+            --:--
+          </span>
+        </>
+      ))
+    }
+  </div>
+</div>

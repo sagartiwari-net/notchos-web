@@ -1,0 +1,62 @@
+---
+/**
+ * Tasks face: lists, quick-add, date groups.
+ * Source: Lumen/Sources/TaskChrome.swift (TasksFace, ChoreRow).
+ * The tasks are sample data written for this page.
+ */
+import FaceHead from '../FaceHead.astro';
+import Icon from '../../Icon.astro';
+
+const sections = [
+  {
+    title: 'Today',
+    rows: [
+      { title: 'Send the proposal', due: 'Today, 5:00 PM', marks: '!!' },
+      { title: 'Book flights for the offsite', due: 'Today' },
+    ],
+  },
+  { title: 'Tomorrow', rows: [{ title: 'Pay rent', due: 'Tomorrow' }] },
+  { title: 'No date', rows: [{ title: 'Tidy the desktop' }, { title: 'Back up photos' }] },
+];
+---
+
+<div class="tasks">
+  <FaceHead icon="checklist" title="Tasks" tint="color-plate-mint">
+    <span class="squarebtn"><Icon name="eye-slash" size={14} /></span>
+  </FaceHead>
+  <div class="chips">
+    <span class="chip is-on">My tasks · 5</span>
+    <span class="chip">Work · 2</span>
+  </div>
+  <div class="field">
+    <Icon name="plus-circle" size={14} />
+    <span class="field__ph">Add a task, e.g. Pay rent Friday</span>
+  </div>
+  <div class="tasks__list fade-bottom">
+    {
+      sections.map((section) => (
+        <div class="tasks__section">
+          <div class="tasks__title">{section.title}</div>
+          {section.rows.map((row) => (
+            <div class="row row--task">
+              <span class="row__circle" />
+              <span class="row__text">
+                <span class="row__title">
+                  {row.title}
+                  {'marks' in row && row.marks && <b class="row__marks">{row.marks}</b>}
+                </span>
+                {'due' in row && row.due && <span class="row__meta">{row.due}</span>}
+              </span>
+              <span class="row__act">
+                <Icon name="plus" size={12} weight={2.6} />
+              </span>
+              <span class="row__act row__act--quiet">
+                <Icon name="trash" size={12} />
+              </span>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>

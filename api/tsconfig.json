@@ -1,0 +1,29 @@
+{
+  // Type checking for the API and its tests (npm run typecheck).
+  // The sources run directly on Node 24 (built-in type stripping), so only erasable
+  // TypeScript syntax is allowed and relative imports carry their .ts extension.
+  // tsconfig.build.json emits dist/ for production and for the stable copy;
+  // tsconfig.scripts.json checks the TypeScript in ../scripts.
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src", "test", "vitest.config.ts"]
+}

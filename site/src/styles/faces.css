@@ -1,0 +1,1813 @@
+/*
+ * The ten open faces and the shared chrome they are built from.
+ *
+ * Shared pieces mirror Lumen/Sources/ToolChrome.swift and ShelfControls.swift:
+ *   .plate   ToolPlate          .fh     FaceHeader
+ *   .chip    FaceTextChip       .chip--primary / --secondary   PrimaryChip / SecondaryChip
+ *   .field   NotchFieldShell    .row    faceListRow
+ * Each face block names the Swift file it was drawn from. Numbers are the app's points.
+ *
+ * "wide" is the app's own layout (740 pt). The compact rules at the end are a web-only
+ * reflow for phone widths.
+ */
+
+/* ------------------------------------------------------------ primitives */
+
+.plate {
+  --s: 32px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  border-radius: calc(var(--s) * 0.28);
+  background: var(--color-fill-idle);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.1);
+  color: var(--color-symbol);
+}
+.plate.is-active {
+  background: var(--color-fill-active);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.18);
+  color: var(--color-symbol-active);
+}
+.plate--tint {
+  background: color-mix(in srgb, var(--tint) 16%, transparent);
+  box-shadow: inset 0 0 0 var(--n-hairline) color-mix(in srgb, var(--tint) 32%, transparent);
+  color: color-mix(in srgb, var(--tint) 92%, transparent);
+}
+.plate--tint.is-active {
+  background: color-mix(in srgb, var(--tint) 28%, transparent);
+  box-shadow: inset 0 0 0 var(--n-hairline) color-mix(in srgb, var(--tint) 55%, transparent);
+  color: var(--tint);
+}
+
+.fh {
+  display: flex;
+  align-items: center;
+  gap: var(--n-space-sm);
+  min-height: 32px;
+  flex: none;
+}
+.fh__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.fh__trail {
+  display: flex;
+  align-items: center;
+  gap: var(--n-space-sm);
+  margin-left: auto;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: var(--n-space-sm);
+  flex: none;
+}
+.chips--center {
+  justify-content: center;
+  gap: 6px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.08);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+.chip.is-on {
+  background: rgb(255 255 255 / 0.16);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.2);
+  color: var(--color-ink);
+}
+.chip--primary {
+  padding: 0 12px;
+  background: rgb(255 255 255 / 0.2);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.14);
+  color: var(--color-ink);
+}
+.chip--teal {
+  background: color-mix(in srgb, var(--color-plate-teal) 22%, transparent);
+}
+.chip--secondary {
+  padding: 0 12px;
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: none;
+  color: rgb(255 255 255 / 0.72);
+}
+.chip--small {
+  font-size: 10.5px;
+}
+.chip--run {
+  padding: 0 14px;
+  gap: 6px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  color: rgb(255 255 255 / 0.42);
+}
+.field__ph {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.34);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  min-height: 38px;
+  padding: 0 var(--n-space-md);
+  border-radius: var(--radius-chip);
+}
+.row.is-emph {
+  background: rgb(255 255 255 / 0.07);
+}
+.row__thumb {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--color-symbol);
+}
+.row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.row__title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row__meta {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-ink-3);
+  white-space: nowrap;
+}
+.row__marks {
+  margin-left: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-symbol);
+}
+.row__act {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 26px;
+  color: rgb(255 255 255 / 0.4);
+}
+.row__act.is-on {
+  color: rgb(255 255 255 / 0.9);
+}
+.row__act--quiet {
+  color: var(--color-ink-3);
+}
+.row__circle {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 0 3.5px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.7px rgb(255 255 255 / 0.85);
+}
+
+.t-ter {
+  font-size: 10px;
+  color: var(--color-ink-3);
+  white-space: nowrap;
+}
+
+.roundbtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12);
+  color: rgb(255 255 255 / 0.9);
+}
+.squarebtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.45);
+}
+.tiny {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgb(255 255 255 / 0.85);
+}
+
+/* FaceScrollFade: soft fade where a list runs under the lip. */
+.fade-bottom {
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 22px), transparent 100%);
+}
+
+/* every face is a column with the app's 8 pt rhythm */
+.home,
+.tray,
+.clip,
+.tasks,
+.timers,
+.prompter,
+.system,
+.tools,
+.ai {
+  display: flex;
+  flex-direction: column;
+  gap: var(--n-space-sm);
+  height: 100%;
+}
+
+/* ------------------------------------------------------------------ home */
+/* TuneChrome.swift: HomeFace, TuneCard, SeekStrip, PulseBars */
+
+.home {
+  --tune: #f0b46a; /* TuneDeck.tint: sampled from the cover */
+  gap: var(--n-space-md);
+}
+.home__today {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 120px;
+}
+.tune {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.tune__cover {
+  position: relative;
+  flex: none;
+  width: 104px;
+  height: 104px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f3b06a 0%, #e58f5c 30%, #cf6d5c 52%, #2f7189 53%, #1c4a63 76%, #122d42 100%);
+  box-shadow:
+    inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.12),
+    0 5px 14px rgb(0 0 0 / 0.38);
+}
+.tune__sun {
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff0c9, #ffd08a 70%);
+}
+.tune__sea {
+  position: absolute;
+  inset: 53% 0 0 0;
+  background:
+    linear-gradient(180deg, rgb(255 208 138 / 0.5), transparent 26%),
+    repeating-linear-gradient(180deg, rgb(255 255 255 / 0.1) 0 1.5px, transparent 1.5px 9px);
+}
+.tune__meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.tune__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tune__sub {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+.seek {
+  margin-top: 11px;
+}
+.seek__track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.12);
+}
+.seek__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--tune);
+  transform: scaleX(0.316);
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+.seek__times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-ink-2);
+}
+.tune__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.tune__btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.78);
+}
+.tune__btn--play {
+  width: 32px;
+  height: 32px;
+  background: color-mix(in srgb, var(--tune) 92%, transparent);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.16);
+  color: rgb(255 255 255 / 0.95);
+}
+.tune__controls .bars {
+  --bar-color: var(--tune);
+  margin-left: auto;
+  margin-right: 4px;
+}
+.home__rule {
+  flex: none;
+  width: var(--n-hairline);
+  height: 96px;
+  background: rgb(255 255 255 / 0.06);
+}
+.home__date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex: none;
+  width: 188px;
+  text-align: right;
+}
+.home__day {
+  font-family: var(--font-rounded);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.78);
+}
+.home__next,
+.home__place {
+  font-size: 10px;
+  color: var(--color-ink-3);
+}
+.home__weather {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+.home__sun {
+  color: rgb(255 199 71 / 0.85);
+}
+.home__temp {
+  font-family: var(--font-rounded);
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgb(255 255 255 / 0.88);
+}
+.home__place {
+  margin-top: -3px;
+}
+/* SystemToolSheets.swift: TimezoneStrip */
+.zones {
+  display: flex;
+  align-items: baseline;
+  padding-top: 2px;
+  white-space: nowrap;
+}
+.zones__city {
+  margin-right: 5px;
+  font-size: 10px;
+  color: var(--color-ink-3);
+}
+.zones__time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-2);
+}
+.zones__dot {
+  padding: 0 8px;
+  font-size: 10px;
+  color: var(--color-ink-3);
+}
+
+/* ------------------------------------------------------------------ tray */
+/* SurfaceRoot.swift: TrayBody, TileFace, nearbyStrip, selectionBar */
+
+.nearby {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.06);
+  white-space: nowrap;
+}
+.nearby__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(52 199 89 / 0.85);
+}
+.nearby__name {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.9);
+}
+.nearby__pin {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.85);
+}
+.nearby__status {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.5);
+}
+.nearby__chev {
+  margin-left: auto;
+  color: rgb(255 255 255 / 0.35);
+}
+.tiles {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: none;
+  width: 96px;
+  height: 76px;
+  border-radius: var(--radius-chip);
+}
+.tile.is-selected {
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.28);
+}
+.tile__name {
+  width: 88px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.92);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* File thumbnails drawn in CSS (the app shows the Finder icon or the image itself). */
+.thumb {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  width: 28px;
+  height: 34px;
+  margin: 0 8px;
+  border-radius: 3px 8px 3px 3px;
+  background: linear-gradient(180deg, #fbfbfc, #dfe1e6);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+.thumb > b {
+  margin-bottom: 4px;
+  padding: 1.5px 3px;
+  border-radius: 2px;
+  background: #e5484d;
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+.thumb--sheet > b {
+  background: #2f9e62;
+}
+.thumb__lines {
+  position: absolute;
+  inset: 8px 5px auto 5px;
+  height: 16px;
+  background: repeating-linear-gradient(180deg, #a9adb8 0 1.5px, transparent 1.5px 4.5px);
+}
+.thumb--image {
+  width: 44px;
+  margin: 0;
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 72% 30%, #ffe7b0 0 12%, transparent 13%),
+    linear-gradient(160deg, #3d6f8f 0%, #274b68 48%, #c9825a 49%, #a3563f 100%);
+}
+.thumb--folder {
+  width: 42px;
+  height: 31px;
+  margin: 3px 1px 0;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #7cc4ff, #3f95e6);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+.thumb--folder::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -4px;
+  width: 17px;
+  height: 7px;
+  border-radius: 3px 4px 0 0;
+  background: #6ab6f7;
+}
+.tray__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--n-space-sm);
+  padding: 2px 2px 0;
+  margin-top: auto;
+}
+.tray__count {
+  font-size: 10px;
+  color: var(--color-ink-2);
+}
+.tray__convert {
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 26px;
+  margin-left: auto;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 0.16);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.95);
+}
+
+/* ------------------------------------------------------------- clipboard */
+/* ClipChrome.swift: ClipboardFace, toolbar, ScrapRow */
+
+.clip__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--n-space-sm);
+  flex: none;
+}
+.clip__gap {
+  flex: 1;
+}
+.clip .rows {
+  flex: 1;
+}
+
+/* -------------------------------------------------------------- calendar */
+/* AgendaChrome.swift: AgendaFace, MonthPane, EventRow, ReminderRow */
+
+.cal {
+  --accent: var(--color-accent);
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  padding-bottom: 10px;
+}
+.cal__month,
+.cal__day {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.cal__month {
+  gap: 12px;
+  padding-right: 4px;
+}
+.cal__rule {
+  flex: none;
+  width: var(--n-hairline);
+  margin: 4px 12px;
+  background: rgb(255 255 255 / 0.08);
+}
+.cal__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+}
+.cal__nav {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: rgb(255 255 255 / 0.55);
+}
+.cal__label {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.cal__week {
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--accent) 95%, white);
+}
+.cal__icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+  text-align: center;
+}
+.cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 6px;
+}
+.cal__cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 38px;
+}
+/* A month that needs six weeks keeps the same total height. */
+.cal__grid[data-rows='6'] {
+  row-gap: 1px;
+}
+.cal__grid[data-rows='6'] .cal__cell {
+  height: 34px;
+}
+.cal__grid[data-rows='5'] .cal__cell:nth-child(n + 36),
+.cal__grid[data-rows='4'] .cal__cell:nth-child(n + 29) {
+  display: none;
+}
+.cal__num {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-family: var(--font-rounded);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-2);
+}
+/* Selected day (today): filled accent disc with a soft ring. */
+.cal__cell[data-today] .cal__num {
+  background: var(--accent);
+  box-shadow:
+    0 0 0 2px var(--n-lip-open),
+    0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 0 8px 3px color-mix(in srgb, var(--accent) 40%, transparent);
+  font-weight: 700;
+  color: #fff;
+}
+.cal__cell[data-marked]::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 85%, transparent);
+}
+.cal__day {
+  gap: var(--n-space-sm);
+}
+.cal__selected {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 26px;
+}
+.cal__buckets {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 2px;
+}
+.bucket {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bucket__title {
+  margin-bottom: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+.evt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 var(--n-space-sm);
+}
+.evt__bar {
+  flex: none;
+  width: 3px;
+  height: 28px;
+  border-radius: 2px;
+  background: var(--c);
+}
+.evt__check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 26px;
+  margin-left: -4px;
+}
+.evt__check > span {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.7px var(--color-symbol);
+}
+.evt__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.evt__title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.evt__time,
+.evt__list {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--color-ink-3);
+  white-space: nowrap;
+}
+.evt__list {
+  font-size: 10px;
+}
+
+/* ----------------------------------------------------------------- tasks */
+/* TaskChrome.swift: TasksFace, ChoreRow */
+
+.tasks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+.tasks__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tasks__title {
+  padding-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-ink-3);
+}
+.row--task {
+  min-height: 36px;
+  padding: 0 var(--n-space-sm);
+}
+
+/* ---------------------------------------------------------------- timers */
+/* ClockChrome.swift: TimersFace, PomoPane, awakeRow */
+
+.pomo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+.pomo__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex: 1;
+}
+.pomo__phase {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.8);
+}
+.pomo__today {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.55);
+}
+.pomo__dots {
+  display: flex;
+  gap: 5px;
+}
+.pomo__dots > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.2);
+}
+.pomo__dots > i.is-on {
+  background: rgb(255 255 255 / 0.9);
+}
+.pomo__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pomo__step {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.6);
+}
+.pomo__step > span {
+  min-width: 56px;
+  margin-right: 2px;
+}
+.pomo__ring {
+  --track: 0.12;
+}
+.pomo__time {
+  font-family: var(--font-rounded);
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: #fff;
+}
+.pomo__caption {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.55);
+}
+.pomo__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  flex: none;
+  width: 120px;
+}
+.pomo__pair {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.pill {
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.92);
+}
+.pill--wide {
+  padding: 7px 10px;
+  background: rgb(255 255 255 / 0.16);
+  font-size: 12px;
+}
+.pill--small {
+  padding: 4px 8px;
+  background: rgb(255 255 255 / 0.1);
+  font-size: 11px;
+}
+.awake {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  color: rgb(255 255 255 / 0.85);
+}
+.awake__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.75);
+  white-space: nowrap;
+}
+.awake__gap {
+  flex: 1;
+}
+
+/* -------------------------------------------------------------- prompter */
+/* ScriptChrome.swift: PrompterFace (library 148 | editor | appearance 158) */
+
+.prompter__cols {
+  display: flex;
+  align-items: stretch;
+  gap: var(--n-space-sm);
+  flex: 1;
+  min-height: 0;
+}
+.prompter__library {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  width: 148px;
+}
+.prompter__scripts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  width: 100%;
+}
+.script {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.04);
+}
+.script.is-on {
+  background: rgb(255 255 255 / 0.14);
+}
+.script__title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.script__meta {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.5);
+}
+.prompter__editor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.06);
+}
+.prompter__name {
+  height: 22px;
+  padding: 0 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #fff;
+}
+.prompter__text {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 6px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.9);
+}
+.prompter__text > p {
+  margin: 0 0 1.05em;
+}
+.prompter__options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: none;
+  width: 158px;
+}
+/* ActButton: the one solid white control in the app. */
+.startbtn {
+  display: grid;
+  place-items: center;
+  height: 28px;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: rgb(0 0 0 / 0.85);
+}
+.prompter__eta {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.65);
+}
+.steprow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.steprow__label {
+  flex: 1;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.55);
+}
+.steprow__value {
+  min-width: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.9);
+  text-align: center;
+}
+.aligns {
+  display: flex;
+  gap: 4px;
+}
+.aligns > span {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  height: 22px;
+  border-radius: 11px;
+  background: rgb(255 255 255 / 0.06);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.5);
+}
+.aligns > span.is-on {
+  background: rgb(255 255 255 / 0.2);
+  color: rgb(255 255 255 / 0.95);
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.08);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
+.toggle.is-on {
+  background: rgb(255 255 255 / 0.16);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.2);
+  color: var(--color-ink);
+}
+.toggle__switch {
+  position: relative;
+  width: 22px;
+  height: 13px;
+  border-radius: 7px;
+  background: rgb(255 255 255 / 0.15);
+}
+.toggle__switch::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.7);
+}
+.toggle.is-on .toggle__switch {
+  background: rgb(255 255 255 / 0.45);
+}
+.toggle.is-on .toggle__switch::after {
+  left: auto;
+  right: 2px;
+  background: rgb(255 255 255 / 0.95);
+}
+
+/* ---------------------------------------------------------------- system */
+/* VitalChrome.swift: SystemFace, monitorCard, sparkWell, VitalBar */
+
+.system__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mcard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 50%),
+    rgb(255 255 255 / 0.055);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.1);
+}
+.mcard__head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+}
+.mcard__title {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
+.mcard__value {
+  font-family: var(--font-rounded);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.mcard__note {
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-3);
+}
+.well {
+  height: 44px;
+  margin-top: 4px;
+  padding: 5px 4px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.22);
+}
+.well > svg {
+  display: block;
+  width: 100%;
+  height: 34px;
+}
+.well__line {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.rates {
+  display: flex;
+  gap: 5px;
+}
+.rate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  box-shadow: inset 0 0 0 var(--n-hairline) color-mix(in srgb, var(--tint) 25%, transparent);
+  color: var(--tint);
+}
+.rate > b {
+  font-family: var(--font-rounded);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.vbar {
+  height: 5px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.1);
+}
+.vbar > i {
+  display: block;
+  width: calc(var(--p) * 100%);
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tint) 85%, transparent), var(--tint));
+}
+.mcard--battery {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.batt {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+.batt__top {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.batt__pct {
+  font-family: var(--font-rounded);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.batt__status {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--color-ink-2);
+}
+.batt__meta {
+  display: flex;
+  gap: 14px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+}
+.batt__meta b {
+  margin-left: 3px;
+  font-family: var(--font-rounded);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.85);
+}
+.batt__cap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: none;
+  width: 78px;
+}
+.batt__cap .vbar {
+  width: 100%;
+  margin-top: 0;
+}
+.batt__caplabel {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+}
+.batt__capvalue {
+  font-family: var(--font-rounded);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--tint);
+}
+
+/* ----------------------------------------------------------------- tools */
+/* HomeToolsChrome.swift: HomeToolsGrid (tile 68 pt, 8 columns, sections) */
+
+.tools__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.tools__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: none;
+}
+.tools__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+}
+.tools__rule {
+  height: var(--n-hairline);
+  background: rgb(255 255 255 / 0.06);
+}
+.tools__grid {
+  display: grid;
+  grid-template-columns: repeat(8, 68px);
+  gap: 13px 8px;
+}
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 68px;
+}
+.tool__name {
+  max-width: 68px;
+  font-size: 10px;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* -------------------------------------------------------------------- ai */
+/* WritingToolsChrome.swift: WritingToolsSheet, SoftTab, SoftActionLink, SoftRunButton */
+
+.ai {
+  gap: var(--n-space-sm);
+}
+.ai__tabs {
+  display: flex;
+  gap: 2px;
+  flex: none;
+  padding: 2px 0;
+}
+.softtab {
+  display: grid;
+  place-items: center;
+  flex: none;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 0.05);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.08);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+/* systemYellow wash when selected */
+.softtab.is-on {
+  background: rgb(255 214 10 / 0.14);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 214 10 / 0.28);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.ai__blurb {
+  flex: none;
+  font-size: 10px;
+  color: var(--color-ink-3);
+}
+.ai__cols {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+.ai__col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.ai__rule {
+  flex: none;
+  width: 1px;
+  background: rgb(255 255 255 / 0.1);
+}
+.ai__label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 26px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+}
+.ai__gap {
+  flex: 1;
+}
+.ai__panel {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 14px;
+  overflow: hidden;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 14px),
+    rgb(0 0 0 / 0.16);
+  box-shadow: inset 0 0 0 var(--n-hairline) rgb(255 255 255 / 0.14);
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.9);
+}
+.ai__panel > p {
+  margin: 0 0 0.9em;
+}
+.ai__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+/* ======================================================================
+ * Compact: a web-only reflow for phone widths.
+ * The app's lip never gets narrower than 420 pt and its faces want 620 to 740 pt, so there is
+ * no app layout to copy here. Same chrome and tokens, one column, fewer items.
+ * ====================================================================== */
+
+.notch[data-mode='compact'] .fh {
+  gap: 7px;
+}
+.notch[data-mode='compact'] .fh__trail {
+  gap: 6px;
+}
+.notch[data-mode='compact'] .chip {
+  padding: 0 9px;
+}
+.notch[data-mode='compact'] .chip--primary,
+.notch[data-mode='compact'] .chip--secondary {
+  padding: 0 10px;
+}
+
+/* home: card, then date and weather side by side, then the clocks */
+.notch[data-mode='compact'] .home {
+  gap: 9px;
+}
+.notch[data-mode='compact'] .home__today {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  min-height: 0;
+}
+.notch[data-mode='compact'] .tune {
+  flex: none;
+  gap: 10px;
+}
+.notch[data-mode='compact'] .tune__cover {
+  width: 84px;
+  height: 84px;
+  border-radius: 11px;
+}
+.notch[data-mode='compact'] .tune__sun {
+  top: 19px;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+}
+.notch[data-mode='compact'] .tune__title {
+  font-size: 14px;
+}
+.notch[data-mode='compact'] .tune__sub {
+  margin-top: 2px;
+  font-size: 11px;
+}
+.notch[data-mode='compact'] .seek {
+  margin-top: 8px;
+}
+.notch[data-mode='compact'] .seek__times {
+  margin-top: 4px;
+}
+.notch[data-mode='compact'] .tune__controls {
+  margin-top: 3px;
+}
+.notch[data-mode='compact'] .tune__btn {
+  width: 24px;
+  height: 24px;
+}
+.notch[data-mode='compact'] .tune__btn--play {
+  width: 28px;
+  height: 28px;
+}
+.notch[data-mode='compact'] .home__rule {
+  width: 100%;
+  height: var(--n-hairline);
+}
+.notch[data-mode='compact'] .home__date {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 3px 10px;
+  width: 100%;
+  text-align: left;
+}
+.notch[data-mode='compact'] .home__weather {
+  grid-column: 2;
+  grid-row: 1;
+  justify-content: flex-end;
+  margin: 0;
+}
+.notch[data-mode='compact'] .home__place {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  text-align: right;
+}
+.notch[data-mode='compact'] .home__next {
+  grid-column: 1;
+  grid-row: 2;
+}
+.notch[data-mode='compact'] .zones {
+  padding-top: 0;
+}
+.notch[data-mode='compact'] .zones__dot {
+  padding: 0 5px;
+}
+.notch[data-mode='compact'] .zones__city {
+  margin-right: 4px;
+}
+
+/* tray: three tiles, the bar keeps Deselect and Convert */
+.notch[data-mode='compact'] .tray__wide,
+.notch[data-mode='compact'] .nearby__status,
+.notch[data-mode='compact'] .tile:nth-child(n + 4) {
+  display: none;
+}
+.notch[data-mode='compact'] .tiles {
+  justify-content: space-between;
+  gap: 0;
+}
+.notch[data-mode='compact'] .tray__convert {
+  width: 104px;
+}
+
+/* clipboard */
+.notch[data-mode='compact'] .clip > .chips {
+  display: none;
+}
+.notch[data-mode='compact'] .row {
+  padding: 0 8px;
+}
+
+/* calendar: the month above, today's bucket below */
+.notch[data-mode='compact'] .cal {
+  flex-direction: column;
+  padding-bottom: 0;
+}
+.notch[data-mode='compact'] .cal__month {
+  flex: none;
+  gap: 7px;
+  padding-right: 0;
+}
+.notch[data-mode='compact'] .cal__label {
+  font-size: 15px;
+}
+.notch[data-mode='compact'] .cal__grid {
+  row-gap: 1px;
+}
+.notch[data-mode='compact'] .cal__cell,
+.notch[data-mode='compact'] .cal__grid[data-rows='6'] .cal__cell {
+  height: 31px;
+}
+.notch[data-mode='compact'] .cal__grid[data-rows='6'] .cal__cell {
+  height: 26px;
+}
+.notch[data-mode='compact'] .cal__num {
+  width: 25px;
+  height: 25px;
+  font-size: 12.5px;
+}
+.notch[data-mode='compact'] .cal__grid[data-rows='6'] .cal__num {
+  width: 22px;
+  height: 22px;
+}
+.notch[data-mode='compact'] .cal__rule {
+  width: auto;
+  height: var(--n-hairline);
+  margin: 9px 0 8px;
+}
+.notch[data-mode='compact'] .cal__selected,
+.notch[data-mode='compact'] .cal__day > .field,
+.notch[data-mode='compact'] .bucket + .bucket {
+  display: none;
+}
+.notch[data-mode='compact'] .cal__day {
+  flex: none;
+}
+.notch[data-mode='compact'] .evt {
+  min-height: 34px;
+  padding: 0 4px;
+}
+
+/* tasks */
+.notch[data-mode='compact'] .row--task .row__act:not(.row__act--quiet) {
+  display: none;
+}
+
+/* timers: ring on the left, state and actions on the right */
+.notch[data-mode='compact'] .pomo {
+  gap: 16px;
+}
+.notch[data-mode='compact'] .pomo__ring {
+  order: -1;
+  --d: 112px !important;
+}
+.notch[data-mode='compact'] .pomo__info {
+  position: absolute;
+  left: 142px;
+  top: 78px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  width: 162px;
+}
+.notch[data-mode='compact'] .pomo__phase {
+  width: 100%;
+}
+.notch[data-mode='compact'] .pomo__steps {
+  display: none;
+}
+.notch[data-mode='compact'] .pomo__actions {
+  flex: 1;
+  width: auto;
+  margin-top: 54px;
+}
+.notch[data-mode='compact'] .pomo__pair {
+  justify-content: stretch;
+}
+.notch[data-mode='compact'] .pomo__pair > .pill {
+  flex: 1;
+}
+.notch[data-mode='compact'] .awake .chip:nth-last-child(-n + 2) {
+  display: none;
+}
+.notch[data-mode='compact'] .timers {
+  position: relative;
+}
+
+/* prompter: editor and options, the library is one tap away in the app */
+.notch[data-mode='compact'] .prompter__library,
+.notch[data-mode='compact'] .steprow:nth-of-type(n + 3),
+.notch[data-mode='compact'] .toggle:last-child {
+  display: none;
+}
+.notch[data-mode='compact'] .prompter__options {
+  width: 128px;
+}
+.notch[data-mode='compact'] .prompter__editor {
+  padding: 6px;
+}
+.notch[data-mode='compact'] .prompter__text {
+  padding: 2px 4px;
+  font-size: 11.5px;
+}
+
+/* system: two columns stay, the network card drops its title for the rate */
+.notch[data-mode='compact'] .mcard {
+  padding: 9px;
+}
+.notch[data-mode='compact'] .mcard__head {
+  gap: 6px;
+}
+.notch[data-mode='compact'] .mcard__title {
+  font-size: 11px;
+}
+.notch[data-mode='compact'] .mcard__value {
+  font-size: 14px;
+  white-space: nowrap;
+}
+.notch[data-mode='compact'] .rates {
+  margin-left: auto;
+}
+.notch[data-mode='compact'] .rates .rate + .rate,
+.notch[data-mode='compact'] .mcard:nth-child(2) .mcard__title {
+  display: none;
+}
+.notch[data-mode='compact'] .mcard__note {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notch[data-mode='compact'] .batt__meta {
+  gap: 10px;
+}
+
+/* tools: four tiles a row */
+.notch[data-mode='compact'] .chips--center {
+  gap: 4px;
+}
+.notch[data-mode='compact'] .chips--center .chip {
+  padding: 0 8px;
+}
+.notch[data-mode='compact'] .tools__grid {
+  grid-template-columns: repeat(4, 68px);
+  justify-content: space-between;
+  gap: 11px 0;
+}
+.notch[data-mode='compact'] .tools__sections {
+  gap: 14px;
+}
+
+/* ai: the tab strip is scrolled to the selected action; input above output */
+.notch[data-mode='compact'] .ai__tabs {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+}
+.notch[data-mode='compact'] .ai__tabs > .softtab:first-child {
+  margin-left: -236px;
+}
+.notch[data-mode='compact'] .ai__blurb,
+.notch[data-mode='compact'] .ai__rule {
+  display: none;
+}
+.notch[data-mode='compact'] .ai__cols {
+  flex-direction: column;
+  gap: 8px;
+}
+.notch[data-mode='compact'] .ai__col {
+  gap: 6px;
+}
+.notch[data-mode='compact'] .ai__col:first-of-type {
+  flex: 1.1 1 0;
+}
+.notch[data-mode='compact'] .ai__label {
+  gap: 8px;
+}
+.notch[data-mode='compact'] .ai__panel {
+  padding: 9px 11px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.notch[data-mode='compact'] .ai__panel > p {
+  margin-bottom: 0.5em;
+}

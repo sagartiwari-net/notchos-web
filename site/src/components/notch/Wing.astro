@@ -1,0 +1,104 @@
+---
+/**
+ * One closed-lip live activity chip. The chips live in the "ears" on either side of the
+ * camera housing; nothing is ever drawn under the housing itself.
+ *
+ * Source per kind:
+ *   music     ClosedWing + PulseBars          Lumen/Sources/TuneChrome.swift
+ *   timer     ClosedTimerWing                 Lumen/Sources/ClockChrome.swift
+ *   download  ClosedDownloadWing              Lumen/Sources/GlanceChrome.swift
+ *   battery   HUDWing(.battery)               Lumen/Sources/GlanceChrome.swift
+ *   meeting   ClosedMeetWing                  Lumen/Sources/AgendaChrome.swift
+ *   transfer  HUDWing(.nearby)                Lumen/Sources/GlanceChrome.swift
+ *   shelf     ClosedShelfWing                 Lumen/Sources/GlanceChrome.swift
+ * Values are sample data; the moving parts are driven by src/lib/notch/live.ts.
+ */
+import Icon from '../Icon.astro';
+import Ring from './Ring.astro';
+import type { Activity } from '../../lib/notch/tokens';
+
+interface Props {
+  kind: Activity;
+}
+
+const { kind } = Astro.props;
+---
+
+<span class:list={['wchip', `wchip--${kind}`]} data-chip={kind}>
+  {
+    kind === 'music' && (
+      <>
+        <span class="wchip__art" />
+        <span class="bars bars--sm" data-bars>
+          <i />
+          <i />
+          <i />
+        </span>
+      </>
+    )
+  }
+  {
+    kind === 'timer' && (
+      <>
+        <Ring size={16} width={2} progress={0.264} name="timer">
+          <Icon name="flame" size={8} />
+        </Ring>
+        <span class="wchip__num" data-live="timer-text">
+          18:24
+        </span>
+      </>
+    )
+  }
+  {
+    kind === 'download' && (
+      <>
+        <Ring size={16} width={2} progress={0.62} name="download">
+          <Icon name="arrow-down" size={8} weight={3.4} />
+        </Ring>
+        <span class="wchip__num wchip__num--bold">2</span>
+      </>
+    )
+  }
+  {
+    kind === 'battery' && (
+      <>
+        <span class="wchip__batt">
+          <Icon name="battery" size={15} weight={2.2} />
+          <i class="wchip__bolt" data-live="pulse">
+            <Icon name="bolt" size={8} />
+          </i>
+        </span>
+        <span class="wchip__meter">
+          <i style="--p: 0.82" />
+        </span>
+        <span class="wchip__label wchip__label--num">82%</span>
+      </>
+    )
+  }
+  {
+    kind === 'meeting' && (
+      <>
+        <Icon name="video" size={13} weight={2.4} />
+        <span class="wchip__num" data-live="meeting-text">
+          4:59
+        </span>
+      </>
+    )
+  }
+  {
+    kind === 'transfer' && (
+      <>
+        <Icon name="phone-arrow" size={14} weight={2.2} class="wchip__dim" />
+        <span class="wchip__label">Clip.mov</span>
+      </>
+    )
+  }
+  {
+    kind === 'shelf' && (
+      <>
+        <Icon name="tray-fill" size={14} class="wchip__dim" />
+        <span class="wchip__num wchip__num--bold">3</span>
+      </>
+    )
+  }
+</span>

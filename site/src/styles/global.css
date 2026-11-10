@@ -1,0 +1,8 @@
+/* Tailwind reads class names from src/ only. Left alone it scans the whole package, so a word
+   such as "hidden" in scripts/ becomes a utility in the site's CSS, and every change to a
+   script rebuilds the stylesheet in dev. */
+@import 'tailwindcss' source('../');
+@import './tokens.css';
+@import './notch.css';
+@import './faces.css';
+@import './page.css';

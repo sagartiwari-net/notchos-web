@@ -1,0 +1,30 @@
+{
+  "name": "notchos-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "NotchOS home page: Astro + Tailwind + GSAP. Static build, no server code.",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "shots": "node scripts/shots.mjs",
+    "fps": "node scripts/fps.mjs",
+    "look": "node scripts/look.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.4.8",
+    "gsap": "^3.15.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@tailwindcss/vite": "^4.3.5",
+    "puppeteer-core": "^25.16.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^6.0.3"
+  }
+}

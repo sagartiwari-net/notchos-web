@@ -1,0 +1,138 @@
+---
+/**
+ * Section 9 item 3: the stage. A drawn Mac screen, a menu bar with a live clock, and the notch
+ * playing through its faces on a loop. Tabs switch the face; hover and click work.
+ *
+ * Hooks for checks and for later phases:
+ *   #stage-notch                      the notch: data-state, data-face (see Notch.astro)
+ *   [role="tab"][data-face="tray"]    one tab per face, aria-selected marks the current one
+ *   ?face=tray                        opens that face and stops the loop
+ *   ?state=closed | peek              closed lip states, loop stopped
+ *   ?right=timer&left=shelf           live activity chips on the closed lip
+ *   ?autoplay=0                       loop stopped
+ * Behaviour is in src/lib/stage.ts.
+ */
+import Icon from './Icon.astro';
+import Notch from './notch/Notch.astro';
+import type { IconName } from '../lib/icons';
+import { FACES, FACE_LABEL, type Face } from '../lib/notch/tokens';
+import { menuBarClock } from '../lib/notch/calendar';
+
+const ICON: Record<Face, IconName> = {
+  home: 'house',
+  tray: 'tray-fill',
+  clipboard: 'clipboard',
+  calendar: 'calendar',
+  tasks: 'checklist',
+  timers: 'timer',
+  prompter: 'prompter',
+  system: 'gauge',
+  tools: 'grid',
+  ai: 'sparkles',
+};
+
+/** One or two sentences per face. Only what the app does today. */
+const COPY: Record<Face, string> = {
+  home: 'What is playing, with controls, next to today’s date, your next event, the weather and the world clocks you pick.',
+  tray: 'Drop files on the notch and they wait in the Tray. Drag them back out, AirDrop them, move them to a folder or convert them.',
+  clipboard: 'Clipboard history with search, pins and reusable snippets. It is off until you start it, and it stays on your Mac.',
+  calendar: 'The month on one side, the day’s events and reminders on the other. Add a reminder or join a meeting from here.',
+  tasks: 'A quick task list with dates and subtasks. Type “Pay rent Friday” and the date is read from the sentence.',
+  timers: 'Pomodoro, countdown and stopwatch, plus Keep Awake. A running timer stays visible on the closed notch.',
+  prompter: 'A teleprompter that scrolls right under the camera, so your eyes stay on the lens. It can follow your voice.',
+  system: 'CPU, memory, network, disk and battery at a glance.',
+  tools: 'Every tool in one grid: QR codes, Android file sharing, window snapping, world clocks, notes and more.',
+  ai: 'Summarise, fix grammar, rewrite, shorten or expand text with on-device writing tools. Needs Apple Intelligence on your Mac.',
+};
+
+/** A neutral menu bar: our own app name and the usual menus. No Apple logo. */
+const MENUS = ['Desk', 'File', 'Edit', 'View', 'Window', 'Help'];
+
+const clock = menuBarClock(new Date(), 'en-GB');
+---
+
+<section class="stage wrap" id="stage" data-stage data-autoplay="off" aria-labelledby="stage-title">
+  <div class="stage__head">
+    <span class="tag">
+      <Icon name="pointer" size={11} />
+      Interactive preview
+    </span>
+  </div>
+  <h2 class="sr-only" id="stage-title">Interactive preview of the NotchOS notch</h2>
+
+  <div class="mac">
+    <div class="mac__screen">
+      <div class="mac__wall" aria-hidden="true"></div>
+      <div class="mac__menubar" aria-hidden="true">
+        <div class="mac__menus">
+          <span class="mac__item mac__item--glyph" data-menubar-item><i class="mac__glyph"></i></span>
+          {
+            MENUS.map((menu) => (
+              <span class="mac__item" data-menubar-item>
+                {menu}
+              </span>
+            ))
+          }
+        </div>
+        <div class="mac__status">
+          <span class="mac__item mac__item--icon" data-menubar-item><Icon name="wifi" size={15} weight={2.2} /></span>
+          <span class="mac__item mac__item--icon" data-menubar-item><Icon name="battery" size={19} weight={1.7} /></span>
+          <span class="mac__item mac__item--icon" data-menubar-item><Icon name="switches" size={15} weight={2} /></span>
+          <span class="mac__item mac__clock" data-menubar-item data-live="menubar-clock">
+            <span class="mac__clock-date" data-live="menubar-date">{clock.date}</span>
+            <span data-live="menubar-time">{clock.time}</span>
+          </span>
+        </div>
+      </div>
+      <Notch id="stage-notch" interactive />
+    </div>
+  </div>
+
+  <div class="stage__controls" data-notch-keepopen>
+    <div class="stage__tabs" role="tablist" aria-label="Faces of the notch">
+      {
+        FACES.map((face, index) => (
+          <button
+            type="button"
+            class="stab"
+            role="tab"
+            id={`stage-tab-${face}`}
+            data-face={face}
+            aria-selected={index === 0 ? 'true' : 'false'}
+            aria-controls="stage-panel"
+            tabindex={index === 0 ? 0 : -1}
+          >
+            <Icon name={ICON[face]} size={15} />
+            <span>{FACE_LABEL[face]}</span>
+            <i class="stab__progress" aria-hidden="true" />
+          </button>
+        ))
+      }
+    </div>
+    <button type="button" class="stage__play" data-autoplay-toggle aria-label="Play the preview" hidden>
+      <Icon name="pause" size={16} class="icon-pause" />
+      <Icon name="play" size={16} class="icon-play" />
+      <span class="stage__play-label" data-autoplay-label aria-hidden="true">Play the loop</span>
+    </button>
+  </div>
+
+  <div class="stage__panel" id="stage-panel" role="tabpanel" aria-labelledby="stage-tab-home" tabindex="0">
+    {
+      FACES.map((face, index) => (
+        <p data-face-copy={face} hidden={index !== 0}>
+          <strong>{FACE_LABEL[face]}.</strong> {COPY[face]}
+        </p>
+      ))
+    }
+  </div>
+  <p class="stage__hint">
+    <span class="hint-pointer">Hover the notch to peek. Click it to open, click outside or press <kbd>Esc</kbd> to close.</span>
+    <span class="hint-touch">Tap the notch to open it. Tap outside to close.</span>
+  </p>
+</section>
+
+<script>
+  import { initStages } from '../lib/stage';
+
+  initStages();
+</script>

@@ -1,0 +1,21 @@
+---
+/**
+ * FaceHeader (Lumen/Sources/ToolChrome.swift): tinted plate + title, trailing actions in the slot.
+ */
+import Plate from './Plate.astro';
+import type { IconName } from '../../lib/icons';
+
+interface Props {
+  icon: IconName;
+  title: string;
+  tint: string;
+}
+
+const { icon, title, tint } = Astro.props;
+---
+
+<div class="fh">
+  <Plate icon={icon} tint={tint} active />
+  <span class="fh__title">{title}</span>
+  <span class="fh__trail"><slot /></span>
+</div>

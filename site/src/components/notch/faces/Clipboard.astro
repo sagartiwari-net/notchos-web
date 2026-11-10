@@ -1,0 +1,62 @@
+---
+/**
+ * Clipboard face: history, snippets, search.
+ * Source: Lumen/Sources/ClipChrome.swift (ClipboardFace, toolbar, ScrapRow).
+ * The clippings are sample data written for this page.
+ */
+import FaceHead from '../FaceHead.astro';
+import Icon from '../../Icon.astro';
+import type { IconName } from '../../../lib/icons';
+
+const rows: Array<{ icon: IconName; title: string; meta: string; pinned?: boolean }> = [
+  { icon: 'text', title: 'Thanks, the files look good. Sending the final cut today.', meta: 'Mail · 2 minutes ago', pinned: true },
+  { icon: 'link', title: 'https://example.com/launch-notes', meta: 'Safari · 8 minutes ago' },
+  { icon: 'image', title: 'Image 1280 × 720', meta: 'Preview · 21 minutes ago' },
+  { icon: 'text', title: '14 Harbour Lane, Unit 3', meta: 'Notes · 1 hour ago' },
+  { icon: 'doc', title: 'Brief.pdf', meta: 'Finder · 2 hours ago' },
+];
+---
+
+<div class="clip">
+  <FaceHead icon="clipboard" title="Clipboard" tint="color-plate-teal">
+    <span class="chip chip--primary">Strip</span>
+    <span class="chip chip--secondary">QR</span>
+    <span class="chip chip--secondary">AI</span>
+  </FaceHead>
+  <div class="clip__bar">
+    <span class="chip is-on">History</span>
+    <span class="chip">Snippets</span>
+    <span class="clip__gap"></span>
+    <span class="chip chip--secondary">Pause</span>
+    <span class="chip chip--secondary">Clear</span>
+    <span class="roundbtn"><Icon name="plus" size={13} weight={2.6} /></span>
+  </div>
+  <div class="field">
+    <Icon name="search" size={14} weight={2.4} />
+    <span class="field__ph">Search clipboard</span>
+  </div>
+  <div class="chips">
+    <span class="chip chip--small">Copy only</span>
+  </div>
+  <div class="rows fade-bottom">
+    {
+      rows.map((row) => (
+        <div class:list={['row', row.pinned && 'is-emph']}>
+          <span class="row__thumb">
+            <Icon name={row.icon} size={14} />
+          </span>
+          <span class="row__text">
+            <span class="row__title">{row.title}</span>
+            <span class="row__meta">{row.meta}</span>
+          </span>
+          <span class:list={['row__act', row.pinned && 'is-on']}>
+            <Icon name="pin" size={12} />
+          </span>
+          <span class="row__act row__act--quiet">
+            <Icon name="trash" size={12} />
+          </span>
+        </div>
+      ))
+    }
+  </div>
+</div>

@@ -1,0 +1,59 @@
+---
+/**
+ * Feature grid. The Mac app is full-lock until trial or paid; marks still show what Pro adds.
+ */
+const groups = [
+  {
+    title: 'Everyday',
+    items: [
+      { name: 'Tray', blurb: 'Drop files into the notch, then AirDrop, move, or clear.', mark: 'Core' },
+      { name: 'Clipboard', blurb: 'History of what you copied, ready to paste again.', mark: 'Core' },
+      { name: 'Calendar', blurb: 'Today and the week under the camera.', mark: 'Core' },
+      { name: 'Tasks', blurb: 'Quick list without leaving the lip.', mark: 'Core' },
+      { name: 'Timers', blurb: 'Countdown that peeks when the notch is closed.', mark: 'Core' },
+      { name: 'Prompter', blurb: 'Scroll your script under the notch while you talk.', mark: 'Core' },
+    ],
+  },
+  {
+    title: 'Pro tools',
+    items: [
+      { name: 'Writing Tools', blurb: 'On-device rewrite and polish — no cloud credits.', mark: 'Pro' },
+      { name: 'Window Snap', blurb: 'Park the front window without leaving the island.', mark: 'Pro' },
+      { name: 'Clean Screen', blurb: 'Dim and lock the display for presenting.', mark: 'Pro' },
+      { name: 'Ambient', blurb: 'Focus loops that stay out of Now Playing.', mark: 'Pro' },
+      { name: 'Lyrics', blurb: 'Live lines from Music while you work.', mark: 'Pro' },
+      { name: 'Bluetooth glance', blurb: 'Battery for nearby headphones and mice.', mark: 'Pro' },
+    ],
+  },
+];
+---
+
+<section class="section wrap" id="features" aria-labelledby="features-title">
+  <header class="section__head">
+    <p class="section__eyebrow">Everything in NotchOS</p>
+    <h2 class="section__title" id="features-title">One island. The tools you actually open.</h2>
+    <p class="section__lead">
+      Until you start a trial or activate a key, the Mac app stays locked. After that, Core faces and Pro tools
+      unlock with your plan.
+    </p>
+  </header>
+
+  {
+    groups.map((group) => (
+      <div class="feat-group">
+        <h3 class="feat-group__title">{group.title}</h3>
+        <ul class="feat-grid">
+          {group.items.map((item) => (
+            <li class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__name">{item.name}</span>
+                <span class={`feat-mark feat-mark--${item.mark === 'Pro' ? 'pro' : 'core'}`}>{item.mark}</span>
+              </div>
+              <p class="feat-card__blurb">{item.blurb}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</section>

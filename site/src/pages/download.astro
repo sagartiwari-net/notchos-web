@@ -1,0 +1,32 @@
+---
+import Simple from '../layouts/Simple.astro';
+
+const dmgHref = '/downloads/NotchOS-0.7.0.dmg';
+---
+
+<Simple title="Download NotchOS" description="Download NotchOS for Apple silicon Macs running macOS 26 or later.">
+  <h1 class="simple__title">Download</h1>
+  <p class="simple__lead">
+    Get the Mac app, then start the 7-day trial inside NotchOS — or activate with the email + key from your
+    purchase.
+  </p>
+  <p>
+    <a class="btn btn--primary" href={dmgHref} download>Download NotchOS 0.7.0 (.dmg)</a>
+  </p>
+  <p>
+    <a class="btn btn--ghost" href="/trial">Start free trial (email me the link)</a>
+  </p>
+  <ol class="simple__steps">
+    <li>Open the DMG and drag NotchOS to Applications.</li>
+    <li>
+      On macOS Sequoia+, if Gatekeeper blocks the first open: System Settings → Privacy &amp; Security → Open
+      Anyway (not Right-click → Open).
+    </li>
+    <li>Launch NotchOS. Start the 7-day trial, or Activate with email + key after purchase.</li>
+  </ol>
+  <p class="simple__note">
+    Requires Apple silicon and macOS 26 or later. Direct file:
+    <a href={dmgHref}><code>{dmgHref}</code></a>
+  </p>
+  <p><a class="btn btn--ghost" href="/#pricing">See pricing</a></p>
+</Simple>

@@ -1,0 +1,17 @@
+---
+import Simple from '../layouts/Simple.astro';
+---
+
+<Simple title="Recover your NotchOS key" description="Resend your NotchOS license key to your PayPal email.">
+  <h1 class="simple__title">Recover key</h1>
+  <p class="simple__lead">
+    Enter the PayPal email that bought NotchOS. If a license exists, we send the key to that same address. The
+    answer looks the same either way, so nobody can fish for customers.
+  </p>
+  <form class="simple__form" onsubmit="return false;">
+    <label class="simple__label" for="recover-email">PayPal email</label>
+    <input class="simple__input" id="recover-email" name="email" type="email" autocomplete="email" placeholder="you@email.com" />
+    <button class="btn btn--primary" type="submit" disabled>Send key — soon</button>
+  </form>
+  <p class="simple__note">Resend goes live with PayPal email in phase W3 / W4.</p>
+</Simple>

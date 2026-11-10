@@ -1,0 +1,53 @@
+---
+/**
+ * AI face: on-device Writing Tools studio (tabs, input, output).
+ * Source: Lumen/Sources/AIChrome.swift, WritingToolsChrome.swift (WritingToolsSheet, SoftTab,
+ *         SoftActionLink, SoftRunButton) and WritingToolsDeck.swift (action titles and blurbs).
+ * The input and output are sample text written for this page.
+ */
+import FaceHead from '../FaceHead.astro';
+import Icon from '../../Icon.astro';
+
+const actions = ['Summarize', 'Grammar', 'Smart Reply', 'Extract', 'Rewrite', 'Shorter', 'Longer', 'Generate'];
+const selected = 'Rewrite';
+---
+
+<div class="ai">
+  <FaceHead icon="sparkles" title="AI" tint="color-plate-yellow" />
+  <div class="ai__tabs">
+    {actions.map((action) => <span class:list={['softtab', action === selected && 'is-on']}>{action}</span>)}
+  </div>
+  <div class="ai__blurb">Clearer wording, same meaning.</div>
+  <div class="ai__cols">
+    <div class="ai__col">
+      <div class="ai__label">Input</div>
+      <div class="ai__panel">
+        <p>
+          hey team, quick note to say the launch went really well and i think we should probably all meet sometime
+          this week to go over what we learned and what we want to do next
+        </p>
+      </div>
+      <div class="ai__row">
+        <span class="chip chip--secondary">Paste</span>
+        <span class="chip chip--secondary">Clear</span>
+        <span class="ai__gap"></span>
+        <span class="chip chip--primary chip--run">Run <Icon name="arrow-right" size={12} weight={2.8} /></span>
+      </div>
+    </div>
+    <span class="ai__rule"></span>
+    <div class="ai__col">
+      <div class="ai__label">
+        Output
+        <span class="ai__gap"></span>
+        <span class="chip chip--secondary">Copy</span>
+        <span class="chip chip--secondary">Replace</span>
+      </div>
+      <div class="ai__panel">
+        <p>Hi team,</p>
+        <p>
+          The launch went really well. Let's meet this week to review what we learned and agree on what comes next.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

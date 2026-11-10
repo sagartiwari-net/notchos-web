@@ -1,0 +1,41 @@
+---
+const steps = [
+  {
+    n: '1',
+    title: 'Pay on this site',
+    body: 'Choose Monthly or Lifetime. PayPal handles the payment — no NotchOS account to create.',
+  },
+  {
+    n: '2',
+    title: 'Key arrives by email',
+    body: 'We send the license key to the email on your PayPal account. Nothing is shown in the browser.',
+  },
+  {
+    n: '3',
+    title: 'Activate on your Mac',
+    body: 'Open NotchOS → Activate. Enter that email and the key. Both must match, then Pro unlocks on this Mac.',
+  },
+];
+---
+
+<section class="section wrap" id="steps" aria-labelledby="steps-title">
+  <header class="section__head">
+    <p class="section__eyebrow">After you pay</p>
+    <h2 class="section__title" id="steps-title">Three steps. Then you are in.</h2>
+  </header>
+  <ol class="steps">
+    {
+      steps.map((step) => (
+        <li class="steps__item">
+          <span class="steps__n" aria-hidden="true">
+            {step.n}
+          </span>
+          <div>
+            <h3 class="steps__title">{step.title}</h3>
+            <p class="steps__body">{step.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>

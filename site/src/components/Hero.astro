@@ -1,0 +1,26 @@
+---
+/**
+ * Hero: headline, one line, Download + See pricing, facts row.
+ */
+import Icon from './Icon.astro';
+---
+
+<section class="hero wrap" aria-labelledby="hero-title">
+  <h1 class="hero__title" id="hero-title">Put your Mac&rsquo;s notch <em>to work.</em></h1>
+  <p class="hero__lead">
+    NotchOS turns the notch into a glass island for the things you reach for all day: dropped files, clipboard
+    history, your calendar, tasks, timers, a teleprompter and system stats.
+  </p>
+  <div class="hero__actions">
+    <a class="btn btn--primary" href="/trial">
+      <Icon name="download" size={17} weight={2.2} />
+      Start free trial
+    </a>
+    <a class="btn btn--ghost" href="/#pricing">See pricing</a>
+  </div>
+  <ul class="hero__facts" aria-label="Good to know">
+    <li>7-day trial, no card</li>
+    <li>One key, one Mac</li>
+    <li>Key sent to your PayPal email</li>
+  </ul>
+</section>

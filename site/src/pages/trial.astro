@@ -1,0 +1,105 @@
+---
+import Simple from '../layouts/Simple.astro';
+---
+
+<Simple
+  title="Start your NotchOS free trial"
+  description="Enter your email to get the NotchOS download link, then start the 7-day trial in the Mac app. No card."
+>
+  <h1 class="simple__title">Start free trial</h1>
+  <p class="simple__lead">
+    Enter your email. We send the download link. Install NotchOS, then tap <strong>Start free trial</strong> in the
+    app — the trial locks to that Mac (one trial per device).
+  </p>
+
+  <form class="simple__form" id="trial-lead-form" novalidate>
+    <label class="simple__label" for="trial-email">Email</label>
+    <input
+      class="simple__input"
+      id="trial-email"
+      name="email"
+      type="email"
+      autocomplete="email"
+      required
+      placeholder="you@email.com"
+    />
+    {/* Honeypot — leave empty */}
+    <input class="simple__hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    <button class="btn btn--primary" type="submit" id="trial-submit">Email me the download link</button>
+    <p class="simple__status" id="trial-status" role="status" aria-live="polite"></p>
+  </form>
+
+  <ol class="simple__steps">
+    <li>Open the DMG and drag NotchOS to Applications.</li>
+    <li>
+      On macOS Sequoia+, if Gatekeeper blocks the first open: System Settings → Privacy &amp; Security → Open
+      Anyway.
+    </li>
+    <li>Launch NotchOS → Start free trial (needs internet once).</li>
+  </ol>
+  <p class="simple__note">Requires Apple silicon and macOS 12 or later. Already have a key? <a href="/download">Download</a> or <a href="/recover">Recover key</a>.</p>
+  <p>
+    <a class="btn btn--ghost" href="/download">Download without email</a>
+    <a class="btn btn--ghost" href="/#pricing">See pricing</a>
+  </p>
+</Simple>
+
+<script>
+  const form = document.getElementById('trial-lead-form');
+  const emailInput = document.getElementById('trial-email');
+  const statusEl = document.getElementById('trial-status');
+  const submitBtn = document.getElementById('trial-submit');
+
+  if (form instanceof HTMLFormElement && emailInput instanceof HTMLInputElement && statusEl && submitBtn instanceof HTMLButtonElement) {
+    const setStatus = (message, kind) => {
+      statusEl.textContent = message;
+      statusEl.dataset.kind = kind;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = emailInput.value.trim();
+      if (email === '' || !email.includes('@')) {
+        setStatus('Enter a valid email address.', 'error');
+        emailInput.focus();
+        return;
+      }
+
+      const company = new FormData(form).get('company');
+      submitBtn.disabled = true;
+      setStatus('Sending…', 'pending');
+
+      try {
+        const res = await fetch('/api/trial-lead', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, company: typeof company === 'string' ? company : '' }),
+        });
+        const body = await res.json().catch(() => ({}));
+
+        if (res.status === 429) {
+          setStatus('Please wait a minute before requesting another email.', 'error');
+          return;
+        }
+        if (!res.ok) {
+          setStatus(typeof body.message === 'string' ? body.message : 'Could not send the email. Try again.', 'error');
+          return;
+        }
+
+        if (body.status === 'has_license') {
+          setStatus('This email already has a NotchOS license. Use Recover key if you need it resent.', 'ok');
+          return;
+        }
+        if (body.status === 'resent') {
+          setStatus('We sent the download link again. Check your inbox.', 'ok');
+          return;
+        }
+        setStatus('Check your email for the download link. Then install and start the trial in the app.', 'ok');
+      } catch {
+        setStatus('Could not reach the server. Is the API running on port 4310?', 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+</script>

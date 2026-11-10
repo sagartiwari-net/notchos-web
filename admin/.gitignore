@@ -1,0 +1,20 @@
+# dependencies and build output
+node_modules
+dist
+dist-ssr
+*.local
+
+# screenshots written by `npm run screenshots`
+screenshots/
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# editor and OS files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?

@@ -4,6 +4,9 @@
 !.env.example
 *.pem
 *.key
+deploy/secrets/
+**/ed25519-private.pem
+**/key-enc.secret
 
 # dependencies and build output
 node_modules

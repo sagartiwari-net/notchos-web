@@ -1,0 +1,36 @@
+---
+/**
+ * Progress ring that moves with transforms only.
+ *
+ * The app draws these with Circle().trim(...). Animating a stroke would repaint every frame, so
+ * the ring here is two half-circles behind two clip boxes: turning the first one 0-180 degrees
+ * fills the right half, turning the second fills the left half. src/lib/notch/live.ts turns them
+ * (setRing); this component renders the still frame.
+ */
+interface Props {
+  /** Diameter in px. */
+  size: number;
+  /** Stroke width in px. */
+  width: number;
+  /** 0..1, the still frame. */
+  progress?: number;
+  /** Name used by live.ts to find the ring: data-ring="<name>". */
+  name?: string;
+  class?: string;
+}
+
+const { size, width, progress = 0, name, class: className } = Astro.props;
+const p = Math.max(0, Math.min(1, progress));
+const first = Math.min(p, 0.5) * 360;
+const second = Math.max(p - 0.5, 0) * 360;
+---
+
+<span class:list={['dial', className]} style={`--d:${size}px;--w:${width}px`} data-ring={name} data-progress={p}>
+  <span class="dial__half dial__half--r"><i data-ring-part="a" style={`transform:rotate(${first}deg)`}></i></span>
+  <span class="dial__half dial__half--l"
+    ><i data-ring-part="b" style={`transform:rotate(${second}deg);visibility:${p > 0.5 ? 'visible' : 'hidden'}`}></i></span
+  >
+  <span class="dial__cap"><i></i></span>
+  <span class="dial__cap" data-ring-part="cap" style={`transform:rotate(${p * 360}deg)`}><i></i></span>
+  <span class="dial__in"><slot /></span>
+</span>

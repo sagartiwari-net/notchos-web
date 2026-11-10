@@ -1,0 +1,53 @@
+---
+const faqs = [
+  {
+    q: 'Which Macs does NotchOS support?',
+    a: 'Apple silicon Macs running macOS 12 or later. Intel Macs are not supported.',
+  },
+  {
+    q: 'How does the free trial work?',
+    a: 'Enter your email on the site to get the download link, install NotchOS, then Start free trial in the app — no card. Each Mac gets one 7-day trial. When it ends, buy a plan to keep going.',
+  },
+  {
+    q: 'Is one key tied to one Mac?',
+    a: 'Yes. A key activates on one Mac at a time. You can move it to a new Mac using a transfer (limited), or free the seat from support.',
+  },
+  {
+    q: 'What do I type to activate?',
+    a: 'The PayPal email that received the key, and the license key itself. Both must match on the server.',
+  },
+  {
+    q: 'How do I cancel a monthly plan?',
+    a: 'Cancel Automatic payments in your PayPal account. NotchOS stays active until the period you already paid for ends.',
+  },
+  {
+    q: 'What if I lose my key?',
+    a: 'Use Recover on this site with your PayPal email. We resend to that same address — we never show the key in the browser.',
+  },
+  {
+    q: 'Do you upload my files or clipboard?',
+    a: 'No. NotchOS runs on your Mac. Writing tools are on-device. License checks only talk to our license server.',
+  },
+  {
+    q: 'Can I get a refund?',
+    a: 'Refund policy will be published before launch on the Refunds page. Contact support from that page when it is live.',
+  },
+];
+---
+
+<section class="section wrap" id="faq" aria-labelledby="faq-title">
+  <header class="section__head">
+    <p class="section__eyebrow">FAQ</p>
+    <h2 class="section__title" id="faq-title">Straight answers</h2>
+  </header>
+  <div class="faq">
+    {
+      faqs.map((item) => (
+        <details class="faq__item">
+          <summary class="faq__q">{item.q}</summary>
+          <p class="faq__a">{item.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>
