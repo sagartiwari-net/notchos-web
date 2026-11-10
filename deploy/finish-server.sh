@@ -1,104 +1,103 @@
 #!/usr/bin/env bash
 # Run on the VPS after clone/reset:
 #   cd /www/wwwroot/notch.sagartiwari.net && bash deploy/finish-server.sh
-# Avoids pasting huge heredocs into aaPanel's web terminal (it corrupts them).
+# Supports aaPanel + Apache (this server) or Nginx if present.
 set -euo pipefail
 
 SITE=/www/wwwroot/notch.sagartiwari.net
-INC_DIR=/www/server/panel/vhost/nginx/extension/notch.sagartiwari.net
-CONF=/www/server/panel/vhost/nginx/notch.sagartiwari.net.conf
 EMAIL="${1:-sagartiwari282@gmail.com}"
+PUBLIC="$SITE/public"
 
 export PATH="/www/server/nodejs/v22.23.4/bin:/www/server/nodejs/v22.21.1/bin:$PATH"
 
 if [[ ! -d "$SITE/.git" ]]; then
-  echo "error: run from a cloned site at $SITE" >&2
+  echo "error: missing git checkout at $SITE" >&2
   exit 1
 fi
 
-mkdir -p "$INC_DIR" "$SITE/public/downloads"
-chown -R www:www "$SITE/public" "$SITE/api" /www/server/notchos || true
-
-# Proxy / admin / downloads snippet (written with printf — no fragile paste heredoc)
-SNIP="$INC_DIR/notchos.conf"
-{
-  echo 'location = /admin { return 301 /admin/; }'
-  echo 'location /admin/ {'
-  echo '    try_files $uri $uri/ /admin/index.html;'
-  echo '}'
-  echo 'location /downloads/ {'
-  echo '    add_header Content-Disposition "attachment";'
-  echo '    add_header Cache-Control "public, max-age=300";'
-  echo '    types { application/octet-stream dmg; }'
-  echo '    default_type application/octet-stream;'
-  echo '    try_files $uri =404;'
-  echo '}'
-  echo 'location /v1/ {'
-  echo '    proxy_http_version 1.1;'
-  echo '    proxy_set_header Host $host;'
-  echo '    proxy_set_header X-Real-IP $remote_addr;'
-  echo '    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;'
-  echo '    proxy_set_header X-Forwarded-Proto $scheme;'
-  echo '    proxy_pass http://127.0.0.1:4391;'
-  echo '}'
-  echo 'location /api/ {'
-  echo '    proxy_http_version 1.1;'
-  echo '    proxy_set_header Host $host;'
-  echo '    proxy_set_header X-Real-IP $remote_addr;'
-  echo '    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;'
-  echo '    proxy_set_header X-Forwarded-Proto $scheme;'
-  echo '    proxy_pass http://127.0.0.1:4391;'
-  echo '}'
-} > "$SNIP"
-
-if [[ ! -f "$CONF" ]]; then
-  echo "error: missing $CONF" >&2
-  ls /www/server/panel/vhost/nginx/ | head -50 >&2 || true
-  exit 1
-fi
-
-# root → public (idempotent)
-sed -i 's|root */www/wwwroot/notch.sagartiwari.net;|root /www/wwwroot/notch.sagartiwari.net/public;|g' "$CONF"
-
-# Deduplicate botched includes from earlier pastes, then add one clean include
-sed -i '/extension\/notch\.sagartiwari\.net\/\*\.conf/d' "$CONF"
-sed -i '/root /a\    include /www/server/panel/vhost/nginx/extension/notch.sagartiwari.net/*.conf;' "$CONF"
-
-echo '=== nginx conf (root/include) ==='
-grep -n 'root \|include.*extension/notch\|server_name' "$CONF" | head -20
-
-# Find aaPanel / openresty / nginx binary
-NGINX_BIN=""
-for c in \
-  /www/server/nginx/sbin/nginx \
-  /www/server/openresty/nginx/sbin/nginx \
-  /usr/local/nginx/sbin/nginx \
-  "$(command -v nginx 2>/dev/null || true)"
-do
-  if [[ -n "$c" && -x "$c" ]]; then NGINX_BIN=$c; break; fi
-done
-if [[ -z "$NGINX_BIN" ]]; then
-  NGINX_BIN="$(find /www/server -type f -name nginx 2>/dev/null | head -1 || true)"
-fi
-if [[ -z "$NGINX_BIN" || ! -x "$NGINX_BIN" ]]; then
-  echo "error: nginx binary not found under /www/server" >&2
-  find /www/server -name nginx 2>/dev/null | head -20 >&2 || true
-  exit 1
-fi
-echo "Using nginx: $NGINX_BIN"
-
-"$NGINX_BIN" -t
-"$NGINX_BIN" -s reload
+mkdir -p "$PUBLIC/downloads" "$PUBLIC/admin"
+chown -R www:www "$PUBLIC" "$SITE/api" /www/server/notchos 2>/dev/null || true
 
 systemctl restart notchos-api || true
 sleep 1
-
 echo '=== health local ==='
 curl -sS http://127.0.0.1:4391/v1/health; echo
+
+# ---------- Apache (aaPanel) ----------
+APACHE_CONF=""
+for c in \
+  /www/server/panel/vhost/apache/notch.sagartiwari.net.conf \
+  /www/server/apache/conf/vhost/notch.sagartiwari.net.conf
+do
+  if [[ -f "$c" ]]; then APACHE_CONF=$c; break; fi
+done
+
+if [[ -n "$APACHE_CONF" ]]; then
+  echo "Using Apache vhost: $APACHE_CONF"
+
+  # DocumentRoot → public
+  sed -i 's|DocumentRoot *"/www/wwwroot/notch.sagartiwari.net"|DocumentRoot "/www/wwwroot/notch.sagartiwari.net/public"|g' "$APACHE_CONF"
+  sed -i 's|<Directory *"/www/wwwroot/notch.sagartiwari.net">|<Directory "/www/wwwroot/notch.sagartiwari.net/public">|g' "$APACHE_CONF"
+
+  # Remove previous NotchOS marker block if re-run
+  if grep -q 'BEGIN NOTCHOS' "$APACHE_CONF"; then
+    sed -i '/# BEGIN NOTCHOS/,/# END NOTCHOS/d' "$APACHE_CONF"
+  fi
+
+  # Insert proxy + SPA fallback before first </VirtualHost>
+  TMP="$(mktemp)"
+  awk '
+    /<\/VirtualHost>/ && !done {
+      print "  # BEGIN NOTCHOS"
+      print "  ProxyPreserveHost On"
+      print "  RequestHeader set X-Forwarded-Proto expr=%{REQUEST_SCHEME}"
+      print "  ProxyPass /v1/ http://127.0.0.1:4391/v1/"
+      print "  ProxyPassReverse /v1/ http://127.0.0.1:4391/v1/"
+      print "  ProxyPass /api/ http://127.0.0.1:4391/api/"
+      print "  ProxyPassReverse /api/ http://127.0.0.1:4391/api/"
+      print "  <Directory \"/www/wwwroot/notch.sagartiwari.net/public\">"
+      print "    Options FollowSymLinks"
+      print "    AllowOverride All"
+      print "    Require all granted"
+      print "    FallbackResource /index.html"
+      print "  </Directory>"
+      print "  <Directory \"/www/wwwroot/notch.sagartiwari.net/public/admin\">"
+      print "    FallbackResource /admin/index.html"
+      print "  </Directory>"
+      print "  # END NOTCHOS"
+      done=1
+    }
+    { print }
+  ' "$APACHE_CONF" > "$TMP"
+  mv "$TMP" "$APACHE_CONF"
+
+  echo '=== apache snippet ==='
+  grep -n 'DocumentRoot\|BEGIN NOTCHOS\|ProxyPass /v1\|END NOTCHOS' "$APACHE_CONF" | head -30
+
+  # Enable modules if possible
+  if [[ -x /www/server/apache/bin/httpd ]]; then
+    /www/server/apache/bin/httpd -M 2>/dev/null | grep -E 'proxy_module|proxy_http|headers' || true
+  fi
+
+  if [[ -x /etc/init.d/httpd ]]; then
+    /etc/init.d/httpd reload || /etc/init.d/httpd restart
+  elif [[ -x /www/server/apache/bin/apachectl ]]; then
+    /www/server/apache/bin/apachectl configtest
+    /www/server/apache/bin/apachectl graceful || /www/server/apache/bin/apachectl restart
+  elif command -v systemctl >/dev/null && systemctl list-units --type=service | grep -q httpd; then
+    systemctl reload httpd || systemctl restart httpd
+  else
+    echo "warn: could not reload Apache automatically — use aaPanel → Website → Reload"
+  fi
+else
+  echo "warn: Apache vhost for notch.sagartiwari.net not found"
+  ls /www/server/panel/vhost/apache/ 2>/dev/null | head || true
+fi
+
 echo '=== health public ==='
-curl -sS https://notch.sagartiwari.net/v1/health; echo
-echo '=== site headers ==='
-curl -sSIL https://notch.sagartiwari.net/ | head -15
+curl -sS https://notch.sagartiwari.net/v1/health || curl -skS https://notch.sagartiwari.net/v1/health || true
+echo
+curl -sSIL https://notch.sagartiwari.net/ | head -15 || true
 
 echo '=== create license ==='
 cd "$SITE/api"
@@ -106,6 +105,6 @@ export NOTCHOS_ENV_FILE=/www/server/notchos/api.env
 npm run license:create -- "$EMAIL" lifetime
 
 echo
-echo "Next: upload DMG via aaPanel Files to:"
-echo "  $SITE/public/downloads/NotchOS-0.7.0.dmg"
-echo "Then open https://notch.sagartiwari.net/download"
+echo "Upload DMG in aaPanel Files to:"
+echo "  $PUBLIC/downloads/NotchOS-0.7.0.dmg"
+echo "Then: https://notch.sagartiwari.net/download"
