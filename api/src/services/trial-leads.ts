@@ -1,17 +1,12 @@
 // Website trial leads: email capture + download mail. Does not start a device trial.
 // See NOTCHOS-TRIAL-SEAT-PLAN.md.
 
-import type { Db } from '../db/pool.ts';
+import type { CoreContext } from '../context.ts';
 import { isDuplicateKeyError, selectOne, withTransaction, write } from '../db/pool.ts';
-import { parseMailConfig } from '../emails/mail-config.ts';
+import { logEmail } from '../emails/email-log.ts';
 import { sendTemplate } from '../emails/mailer.ts';
+import { resolveMailConfig } from '../emails/resolve-mail.ts';
 import { guardEmail, guardMessage, type EmailGuardFail } from '../lib/email-guard.ts';
-import type { Clock } from '../lib/time.ts';
-
-export interface TrialLeadDeps {
-  db: Db;
-  clock: Clock;
-}
 
 export type TrialLeadOutcome =
   | {
@@ -32,15 +27,15 @@ export type TrialLeadOutcome =
 const RESEND_COOLDOWN_MS = 2 * 60 * 1000;
 const RESEND_MAX_PER_DAY = 5;
 
-async function downloadUrl(db: Db, fallback: string): Promise<string> {
-  const row = await selectOne<{ value: string }>(db, 'SELECT value FROM settings WHERE name = ?', ['download_url']);
+async function downloadUrl(ctx: CoreContext, fallback: string): Promise<string> {
+  const row = await selectOne<{ value: string }>(ctx.db, 'SELECT value FROM settings WHERE name = ?', ['download_url']);
   const value = row?.value?.trim();
   return value && value !== '' ? value : fallback;
 }
 
-async function hasActiveLicense(db: Db, email: string, now: Date): Promise<boolean> {
+async function hasActiveLicense(ctx: CoreContext, email: string, now: Date): Promise<boolean> {
   const row = await selectOne<{ id: number }>(
-    db,
+    ctx.db,
     `SELECT id FROM licenses
       WHERE email = ? AND status = 'active'
         AND (expires_at IS NULL OR expires_at > ?)
@@ -55,7 +50,7 @@ async function hasActiveLicense(db: Db, email: string, now: Date): Promise<boole
  * `resend` forces a new mail when a lead already exists (still rate-limited).
  */
 export async function submitTrialLead(
-  deps: TrialLeadDeps,
+  ctx: CoreContext,
   input: { email: string; ip: string | null; userAgent: string | null; resend?: boolean },
 ): Promise<TrialLeadOutcome> {
   const guarded = await guardEmail(input.email);
@@ -64,16 +59,16 @@ export async function submitTrialLead(
   }
   const email = guarded.email;
 
-  const mail = parseMailConfig();
-  const now = deps.clock.now();
-  const link = await downloadUrl(deps.db, mail.downloadUrl);
+  const mail = await resolveMailConfig(ctx);
+  const now = ctx.clock.now();
+  const link = await downloadUrl(ctx, mail.downloadUrl);
 
-  if (await hasActiveLicense(deps.db, email, now)) {
+  if (await hasActiveLicense(ctx, email, now)) {
     return { ok: true, status: 'has_license', email, downloadUrl: link };
   }
   const ua = input.userAgent === null || input.userAgent === '' ? null : input.userAgent.slice(0, 512);
 
-  const result = await withTransaction(deps.db, async (tx) => {
+  const result = await withTransaction(ctx.db, async (tx) => {
     let lead = await selectOne<{
       id: number;
       status: string;
@@ -138,21 +133,37 @@ export async function submitTrialLead(
     return { ok: false, error: result.error, retryAfterSec: result.retryAfterSec };
   }
 
-  const sent = await sendTemplate(mail, 'trial_download', {
-    email,
-    downloadUrl: link,
-    siteUrl: mail.siteUrl,
-    pricingUrl: mail.pricingUrl,
-    supportEmail: mail.supportEmail,
-  });
-
-  return {
-    ok: true,
-    status: result.isResend ? 'resent' : 'mailed',
-    email,
-    downloadUrl: link,
-    mailPath: sent.path,
-  };
+  try {
+    const sent = await sendTemplate(mail, 'trial_download', {
+      email,
+      downloadUrl: link,
+      siteUrl: mail.siteUrl,
+      pricingUrl: mail.pricingUrl,
+      supportEmail: mail.supportEmail,
+    });
+    await logEmail(ctx.db, {
+      to: email,
+      template: 'trial_download',
+      status: sent.mode === 'smtp' ? 'sent' : 'file',
+      createdAt: now,
+    });
+    return {
+      ok: true,
+      status: result.isResend ? 'resent' : 'mailed',
+      email,
+      downloadUrl: link,
+      mailPath: sent.path,
+    };
+  } catch (err) {
+    await logEmail(ctx.db, {
+      to: email,
+      template: 'trial_download',
+      status: 'failed',
+      error: err instanceof Error ? err.message : String(err),
+      createdAt: now,
+    });
+    throw err;
+  }
 }
 
 export type { EmailGuardFail };

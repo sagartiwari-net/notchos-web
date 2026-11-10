@@ -52,6 +52,7 @@ import type {
   Settings,
   SettingsUpdate,
   CreateTrialInput,
+  EmailLogItem,
   SeatMove,
   TrialLead,
   TrialListItem,
@@ -330,6 +331,18 @@ export const grantTrial = createTrial
 export function listTrialLeads(params: { q?: string; page?: number; page_size?: number } = {}): Promise<Page<TrialLead>> {
   return request<Page<TrialLead>>('GET', '/trial-leads', {
     query: { q: params.q, page: params.page, page_size: params.page_size },
+  })
+}
+
+/**
+ * GET /api/emails?q=&status=&page=&page_size=
+ * Outbound mail log (trial download, keys, …). Newest first.
+ */
+export function listEmails(
+  params: { q?: string; status?: string; page?: number; page_size?: number } = {},
+): Promise<Page<EmailLogItem>> {
+  return request<Page<EmailLogItem>>('GET', '/emails', {
+    query: { q: params.q, status: params.status, page: params.page, page_size: params.page_size },
   })
 }
 

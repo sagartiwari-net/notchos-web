@@ -5,6 +5,7 @@ import type { RouteHandle } from '@/frame/nav'
 import { RouteError } from '@/frame/route-error'
 import { AuditLogPage } from '@/pages/audit-log-page'
 import { DashboardPage } from '@/pages/dashboard-page'
+import { EmailsPage } from '@/pages/emails-page'
 import { LicenseDetailPage } from '@/pages/license-detail-page'
 import { LicensesPage } from '@/pages/licenses-page'
 import { LoginPage } from '@/pages/login-page'
@@ -25,6 +26,7 @@ const crumbs = {
   trials: { crumbs: () => [{ label: 'Trials' }] },
   trialLeads: { crumbs: () => [{ label: 'Trial leads' }] },
   seatMoves: { crumbs: () => [{ label: 'Seat moves' }] },
+  emails: { crumbs: () => [{ label: 'Emails' }] },
   settings: { crumbs: () => [{ label: 'Settings' }] },
   audit: { crumbs: () => [{ label: 'Audit log' }] },
   notFound: { crumbs: () => [{ label: 'Page not found' }] },
@@ -35,8 +37,7 @@ const crumbs = {
  * from the root of its own hostname; the web server must answer unknown paths with index.html.
  *
  * Everything except /login sits inside AppShell, which is also the signed-out guard.
- * Payments, Webhooks and Emails have no route yet (phase W3): their addresses show the
- * not-found page.
+ * Payments and Webhooks have no route yet (phase W3): their addresses show the not-found page.
  */
 // Vite `base` is `/` locally and `/admin/` on the temporary same-domain deploy.
 const basename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || undefined
@@ -59,6 +60,7 @@ export const router = createBrowserRouter(
         { path: 'trials', element: <TrialsPage />, handle: crumbs.trials },
         { path: 'trial-leads', element: <TrialLeadsPage />, handle: crumbs.trialLeads },
         { path: 'seat-moves', element: <SeatMovesPage />, handle: crumbs.seatMoves },
+        { path: 'emails', element: <EmailsPage />, handle: crumbs.emails },
         { path: 'settings', element: <SettingsPage />, handle: crumbs.settings },
         { path: 'audit', element: <AuditLogPage />, handle: crumbs.audit },
         { path: '*', element: <NotFoundPage />, handle: crumbs.notFound },

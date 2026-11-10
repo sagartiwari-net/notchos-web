@@ -29,8 +29,8 @@ export interface NavGroup {
 }
 
 /**
- * The pages of plan section 8. Payments, Webhooks and Emails arrive in phase W3: they are
- * listed so the sidebar already has its final shape, but they are not links.
+ * The pages of plan section 8. Payments and Webhooks arrive in phase W3: they are listed
+ * so the sidebar already has its final shape, but they are not links. Emails is live.
  */
 export const NAV_GROUPS: NavGroup[] = [
   {
@@ -63,7 +63,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: 'Payments', icon: CreditCardIcon, arrivesIn: 'W3' },
       { title: 'Webhooks', icon: WebhookIcon, arrivesIn: 'W3' },
-      { title: 'Emails', icon: MailIcon, arrivesIn: 'W3' },
+      { title: 'Emails', icon: MailIcon, to: '/emails' },
     ],
   },
   {

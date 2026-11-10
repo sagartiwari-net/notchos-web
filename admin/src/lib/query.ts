@@ -24,6 +24,9 @@ export const queryKeys = {
   trialLeadLists: ['trial-leads'] as const,
   trialLeadList: (params: { q?: string; page?: number; page_size?: number }) =>
     ['trial-leads', params] as const,
+  emailLists: ['emails'] as const,
+  emailList: (params: { q?: string; status?: string; page?: number; page_size?: number }) =>
+    ['emails', params] as const,
   seatMoveLists: ['seat-moves'] as const,
   seatMoveList: (params: { q?: string; page?: number; page_size?: number }) =>
     ['seat-moves', params] as const,

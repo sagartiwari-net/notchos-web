@@ -11,6 +11,7 @@ import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 import { registerAuditRoutes } from '../admin/audit-routes.ts';
 import { clearedSessionCookie, findSession, readCookie, SESSION_COOKIE, writeComesFromSameSite } from '../admin/auth.ts';
 import { registerDashboardRoutes } from '../admin/dashboard-routes.ts';
+import { registerEmailRoutes } from '../admin/email-routes.ts';
 import { registerLicenseRoutes } from '../admin/license-routes.ts';
 import { registerPublicSessionRoutes, registerSessionInfoRoute } from '../admin/session-routes.ts';
 import { registerSettingsRoutes } from '../admin/settings-routes.ts';
@@ -52,6 +53,7 @@ export const adminRoutes: FastifyPluginAsync<{ ctx: AppContext }> = async (app, 
     registerLicenseRoutes(secured, ctx);
     registerTrialRoutes(secured, ctx);
     registerSettingsRoutes(secured, ctx);
+    registerEmailRoutes(secured, ctx);
     registerAuditRoutes(secured, ctx);
   });
 };

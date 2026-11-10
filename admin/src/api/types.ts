@@ -254,6 +254,18 @@ export interface TrialLead {
   created_at: IsoDateTime
 }
 
+/** One row from email_log (sent, file-written, or failed). */
+export interface EmailLogItem {
+  id: number
+  license_id: number | null
+  to_email: string
+  template: string
+  status: string
+  attempts: number
+  error: string | null
+  created_at: IsoDateTime
+}
+
 export type SeatMoveReason = 'user_deactivate' | 'user_transfer' | 'admin_free_seat' | 'admin_revoke'
 export type SeatMoveActor = 'user' | 'admin' | 'system'
 
