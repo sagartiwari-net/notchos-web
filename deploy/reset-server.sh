@@ -63,13 +63,48 @@ echo "==> migrate database"
   npm run db:migrate
 )
 
-echo "==> restart API"
-if systemctl list-unit-files | grep -q '^notchos-api.service'; then
-  systemctl restart notchos-api
-  systemctl --no-pager --full status notchos-api | head -20
-else
-  echo "warn: notchos-api.service not installed yet — see deploy/SERVER.md"
+echo "==> install / restart API (systemd)"
+NODE_ABS="$(command -v node)"
+UNIT=/etc/systemd/system/notchos-api.service
+cat >"$UNIT" <<EOF
+[Unit]
+Description=NotchOS license API (notch.sagartiwari.net)
+After=network.target mariadb.service mysqld.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=www
+Group=www
+WorkingDirectory=$ROOT/api
+Environment=NOTCHOS_ENV_FILE=/www/server/notchos/api.env
+ExecStart=$NODE_ABS dist/server.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+# Drop any hand-started process still bound to 4391 so systemd can take the port.
+if command -v fuser >/dev/null 2>&1; then
+  fuser -k 4391/tcp 2>/dev/null || true
+elif command -v lsof >/dev/null 2>&1; then
+  PIDS="$(lsof -t -iTCP:4391 -sTCP:LISTEN 2>/dev/null || true)"
+  if [[ -n "$PIDS" ]]; then
+    # shellcheck disable=SC2086
+    kill $PIDS 2>/dev/null || true
+    sleep 1
+  fi
 fi
+systemctl daemon-reload
+systemctl enable notchos-api >/dev/null
+systemctl restart notchos-api
+sleep 1
+systemctl --no-pager --full status notchos-api | head -20
+curl -sS http://127.0.0.1:4391/v1/health || true
+echo
 
 echo ""
 echo "OK. Smoke:"
