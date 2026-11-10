@@ -11,16 +11,31 @@ if [[ ! -f /www/server/notchos/api.env ]]; then
   exit 1
 fi
 
-NODE_BIN="$(command -v node || true)"
+# Prefer aaPanel Node builds that satisfy Astro (>=22.23.4). PATH alone often
+# resolves an older 22.x and aborts the site build while leaving public/ on the old DMG.
+NODE_BIN=""
+if [[ -d /www/server/nodejs ]]; then
+  while IFS= read -r cand; do
+    [[ -x "$cand" ]] || continue
+    if "$cand" -e 'const [a,b,c]=process.versions.node.split(".").map(Number); process.exit(a>22||(a===22&&(b>23||(b===23&&c>=4)))?0:1)' 2>/dev/null; then
+      NODE_BIN="$cand"
+      break
+    fi
+  done < <(ls -1d /www/server/nodejs/v*/bin/node 2>/dev/null | sort -V -r)
+fi
 if [[ -z "$NODE_BIN" ]]; then
-  echo "error: node not in PATH. Install Node 24+ in aaPanel (Node version manager)." >&2
+  NODE_BIN="$(command -v node || true)"
+fi
+if [[ -z "$NODE_BIN" || ! -x "$NODE_BIN" ]]; then
+  echo "error: node not found. Install Node >=22.23.4 in aaPanel (Node version manager)." >&2
   exit 1
 fi
-NODE_MAJOR="$("$NODE_BIN" -p 'process.versions.node.split(".")[0]')"
-if [[ "$NODE_MAJOR" -lt 22 ]]; then
-  echo "error: need Node >= 22 (got $($NODE_BIN -v))" >&2
+if ! "$NODE_BIN" -e 'const [a,b,c]=process.versions.node.split(".").map(Number); process.exit(a>22||(a===22&&(b>23||(b===23&&c>=4)))?0:1)' 2>/dev/null; then
+  echo "error: Astro needs Node >=22.23.4 (got $($NODE_BIN -v)). Switch aaPanel Node or install v22.23.4+." >&2
   exit 1
 fi
+export PATH="$(dirname "$NODE_BIN"):$PATH"
+echo "==> using $($NODE_BIN -v) ($NODE_BIN)"
 
 echo "==> api: npm ci + build"
 (
