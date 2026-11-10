@@ -1,0 +1,14 @@
+# secrets — never tracked
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# dependencies and build output
+node_modules
+dist
+
+# local noise
+.DS_Store
+*.log
