@@ -12,7 +12,7 @@ export const SETTING_DEFAULTS = {
 
 export type NumericSetting = keyof typeof SETTING_DEFAULTS;
 
-const SETTING_RANGE: Record<NumericSetting, { min: number; max: number }> = {
+export const SETTING_RANGE: Record<NumericSetting, { min: number; max: number }> = {
   trial_days: { min: 1, max: 365 },
   transfer_limit: { min: 0, max: 1000 },
   renewal_buffer_hours: { min: 0, max: 24 * 30 },

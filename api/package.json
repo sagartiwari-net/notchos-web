@@ -23,6 +23,7 @@
     "license:expire": "node src/cli/index.ts license:expire",
     "license:reset-seat": "node src/cli/index.ts license:reset-seat",
     "license:list": "node src/cli/index.ts license:list",
+    "admin:create": "node src/cli/index.ts admin:create",
     "email:list": "node src/cli/index.ts email:list",
     "email:preview": "node src/cli/index.ts email:preview",
     "email:preview-all": "node src/cli/index.ts email:preview-all",

@@ -1,37 +1,17 @@
 /**
- * The one place where a call of the data module turns into an HTTP request.
+ * Turns a data-module call into an HTTP request to the live admin API.
  *
- * Phase A0: `send` hands the request to the in-browser mock (./mock/server.ts).
- * Phase W2: replace the body of `send` with the fetch call below and delete ./mock.
- * Nothing else in the admin has to change: the paths, bodies and the handling of answers
- * and errors below are already the real ones.
- *
- *   const response = await fetch(API_BASE + url, {
- *     method,
- *     credentials: 'same-origin',            // the HttpOnly session cookie
- *     headers: body === undefined
- *       ? { Accept: 'application/json' }
- *       : { Accept: 'application/json', 'Content-Type': 'application/json' },
- *     body,
- *   })
- *   return { status: response.status, body: await response.text() }
- *
- * Every call is a relative /api/... path on the admin's own hostname, so there is no API
- * hostname in the bundle, no CORS, and the cookie stays first-party (plan section 3).
- *
- * What goes over the wire follows the API's existing conventions (api/README.md):
- * - A GET has no body. A POST or PUT always sends a JSON object with
- *   Content-Type: application/json; an action without input sends {}.
- * - A 2xx answer is a JSON object (204 or an empty body is accepted too). Fields the panel
- *   does not know, such as server_time, are ignored.
- * - Anything else is an error object, see ./errors.ts.
+ * Browser paths are under API_BASE. Vite (dev) and Apache (production) forward them to
+ * the API's /admin/* routes. Session is an HttpOnly cookie (credentials: 'same-origin').
  */
 
 import { ApiError, SERVER_ERROR_CODES, type ApiErrorCode } from './errors'
-import { mockServer } from './mock/server'
 
-/** Prefix of every request. Vite (dev, preview) and Nginx (production) forward it to the API. */
-export const API_BASE = '/api'
+/**
+ * Dev (Vite on :4311): `/api` → proxy rewrite → API `/admin`.
+ * Production (same host as the site): `/admin-api` → Apache ProxyPass → API `/admin`.
+ */
+export const API_BASE = import.meta.env.VITE_ADMIN_API_BASE ?? '/api'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT'
 
@@ -46,13 +26,20 @@ export interface RequestOptions {
 
 interface WireResponse {
   status: number
-  /** The response body as text; '' when there is none. */
   body: string
 }
 
-/** `url` is the path under API_BASE with its query string, for example "/licenses?page=2". */
 async function send(method: HttpMethod, url: string, body: string | undefined): Promise<WireResponse> {
-  return mockServer.handle(method, url, body)
+  const response = await fetch(API_BASE + url, {
+    method,
+    credentials: 'same-origin',
+    headers:
+      body === undefined
+        ? { Accept: 'application/json' }
+        : { Accept: 'application/json', 'Content-Type': 'application/json' },
+    body,
+  })
+  return { status: response.status, body: await response.text() }
 }
 
 function toQueryString(query: Record<string, QueryValue> | undefined): string {
@@ -103,7 +90,6 @@ function fallbackMessage(code: ApiErrorCode): string {
   }
 }
 
-/** Reads { "error", "message", "fields", "retry_after" }; falls back to the HTTP status. */
 function toApiError(response: WireResponse): ApiError {
   let code = codeForStatus(response.status)
   let message: string | undefined
@@ -133,7 +119,7 @@ function toApiError(response: WireResponse): ApiError {
       }
     }
   } catch {
-    // Not JSON (for example an HTML error page from a proxy): keep the status-based code.
+    // Not JSON (proxy HTML error page): keep status-based code.
   }
   return new ApiError({
     status: response.status,
@@ -144,10 +130,6 @@ function toApiError(response: WireResponse): ApiError {
   })
 }
 
-/**
- * Sends one request and returns the parsed JSON answer.
- * Rejects with an ApiError for every failure: no answer, a non-2xx status, unreadable JSON.
- */
 export async function request<T>(method: HttpMethod, path: string, options: RequestOptions = {}): Promise<T> {
   const url = path + toQueryString(options.query)
   const body = method === 'GET' ? undefined : JSON.stringify(options.body ?? {})

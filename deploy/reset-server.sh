@@ -36,11 +36,11 @@ echo "==> site: npm ci + build"
   npm run build
 )
 
-echo "==> admin: npm ci + build (base /admin/)"
+echo "==> admin: npm ci + build (base /admin/, API /admin-api)"
 (
   cd admin
   npm ci
-  ADMIN_BASE=/admin/ npm run build
+  ADMIN_BASE=/admin/ VITE_ADMIN_API_BASE=/admin-api npm run build
 )
 
 echo "==> publish static → public/"
@@ -70,6 +70,8 @@ echo ""
 echo "OK. Smoke:"
 echo "  curl -sS https://notch.sagartiwari.net/v1/health"
 echo "  ls -la public/downloads/"
-echo "Admin UI (mock until W2): https://notch.sagartiwari.net/admin/"
+echo "Admin UI (live DB): https://notch.sagartiwari.net/admin/"
+echo "Create admin user (once):"
+echo "  cd api && NOTCHOS_ENV_FILE=/www/server/notchos/api.env npm run admin:create -- YOUR_USER 'YourPassword12'"
 echo "Create a real license:"
 echo "  cd api && NOTCHOS_ENV_FILE=/www/server/notchos/api.env npm run license:create -- you@email.com lifetime"

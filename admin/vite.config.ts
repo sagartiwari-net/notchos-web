@@ -9,14 +9,16 @@ const HOST = '127.0.0.1'
 const ADMIN_PORT = 4311
 const API_ORIGIN = 'http://127.0.0.1:4310'
 
-// The browser only ever calls relative /api/... paths. In dev and preview they are
-// forwarded to the API's admin routes: /api/<path> -> http://127.0.0.1:4310/admin/<path>.
-// In production Nginx does the same on the admin hostname (plan section 11).
-// The Host and Origin headers are passed through unchanged, as Nginx will pass them.
+// Browser → Vite → API /admin/*.
+// Local default API_BASE is /api. Production same-host build uses /admin-api (see reset-server).
 const apiProxy: Record<string, ProxyOptions> = {
   '/api': {
     target: API_ORIGIN,
     rewrite: (path) => path.replace(/^\/api(?=\/|$)/, '/admin'),
+  },
+  '/admin-api': {
+    target: API_ORIGIN,
+    rewrite: (path) => path.replace(/^\/admin-api(?=\/|$)/, '/admin'),
   },
 }
 

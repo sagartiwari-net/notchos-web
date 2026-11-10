@@ -30,6 +30,9 @@ cat > "$BLOCK_FILE" <<EOF
   ProxyPassReverse /v1/ http://127.0.0.1:4391/v1/
   ProxyPass /api/ http://127.0.0.1:4391/api/
   ProxyPassReverse /api/ http://127.0.0.1:4391/api/
+  # Admin SPA calls /admin-api/* → API /admin/*
+  ProxyPass /admin-api/ http://127.0.0.1:4391/admin/
+  ProxyPassReverse /admin-api/ http://127.0.0.1:4391/admin/
   <Directory "${SITE_PUBLIC}">
     Options FollowSymLinks
     AllowOverride All

@@ -62,7 +62,7 @@ import type {
  * Where the data comes from. 'mock' while the module answers from memory (phase A0);
  * W2 sets this to 'live'. The app frame uses it to say so on screen.
  */
-export const dataSource: 'mock' | 'live' = 'mock'
+export const dataSource: 'mock' | 'live' = 'live'
 
 // ---------------------------------------------------------------------------
 // Session

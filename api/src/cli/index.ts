@@ -12,11 +12,12 @@ import { ConfigError } from '../config.ts';
 import { MigrationError } from '../db/migrate.ts';
 import type { CliIo, Command } from './command.ts';
 import { UsageError } from './command.ts';
+import { adminCommands } from './commands/admin.ts';
 import { dbCommands } from './commands/db.ts';
 import { emailCommands } from './commands/email.ts';
 import { licenseCommands } from './commands/license.ts';
 
-export const COMMANDS: Command[] = [...licenseCommands, ...dbCommands, ...emailCommands];
+export const COMMANDS: Command[] = [...licenseCommands, ...adminCommands, ...dbCommands, ...emailCommands];
 
 function printHelp(io: CliIo): void {
   io.out('NotchOS API command line');

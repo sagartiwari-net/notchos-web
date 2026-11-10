@@ -1,15 +1,17 @@
 // Builds the Fastify application: logging, error handling, and the route groups.
 //
-// Route groups are Fastify plugins registered under a prefix. Phase W1 has one:
+// Route groups are Fastify plugins registered under a prefix:
 //   /v1/*      routes/v1.ts      the Mac app
-// Later phases add theirs the same way (for example /admin/* in W2), each receiving the
-// shared AppContext.
+//   /api/*     routes/public.ts  the public site (trial leads)
+//   /admin/*   routes/admin.ts   the admin panel (W2), session cookie + TOTP login
+// Each receives the shared AppContext.
 
 import Fastify from 'fastify';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import type { AppContext } from './context.ts';
 import { sendError } from './http/respond.ts';
 import { toIso } from './lib/time.ts';
+import { adminRoutes } from './routes/admin.ts';
 import { publicRoutes } from './routes/public.ts';
 import { v1Routes } from './routes/v1.ts';
 
@@ -149,6 +151,7 @@ export function buildApp(ctx: AppContext, options: BuildAppOptions = {}): Fastif
 
   void app.register(v1Routes, { prefix: '/v1', ctx });
   void app.register(publicRoutes, { prefix: '/api', ctx });
+  void app.register(adminRoutes, { prefix: '/admin', ctx });
 
   return app;
 }

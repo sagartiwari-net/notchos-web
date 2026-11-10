@@ -59,6 +59,11 @@ export interface Config {
   /** Path of the Ed25519 private key (PKCS#8 PEM) that signs tokens. */
   signingKeyFile: string;
   rateLimit: RateLimitConfig;
+  /**
+   * Public site URL (SITE_URL). The admin API accepts writes whose Origin is this host
+   * (or the host the request itself was sent to). Unset in most tests.
+   */
+  siteUrl?: string;
   /** Folder with the SQL migrations; the API refuses to start when the database is behind it. */
   migrationsDir: string;
 }
@@ -209,6 +214,21 @@ export function parseKeyEncSecret(values: EnvValues): Buffer {
   return secret;
 }
 
+function siteUrlField(values: EnvValues): { siteUrl?: string } {
+  const raw = optional(values, 'SITE_URL');
+  if (raw === undefined) return {};
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new ConfigError('SITE_URL must be a full URL such as https://notchos.app');
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new ConfigError('SITE_URL must start with https:// (or http:// for local development)');
+  }
+  return { siteUrl: raw };
+}
+
 export function parseConfig(values: EnvValues): Config {
   const host = optional(values, 'HOST') ?? '127.0.0.1';
   if (!LOOPBACK_HOSTS.has(host)) {
@@ -235,6 +255,7 @@ export function parseConfig(values: EnvValues): Config {
       keyMax: integer(values, 'RATE_LIMIT_KEY_MAX', 10, 1, 1_000_000),
     },
     migrationsDir: migrationsDir(values),
+    ...siteUrlField(values),
   };
   return config;
 }

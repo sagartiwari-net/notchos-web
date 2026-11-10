@@ -4,6 +4,7 @@
 
 import type { Config } from './config.ts';
 import { LicenseKeyCipher } from './crypto/license-key.ts';
+import { SecretBox } from './crypto/secret-box.ts';
 import type { TokenSigner } from './crypto/signing.ts';
 import { loadSigner } from './crypto/signing.ts';
 import type { Db } from './db/pool.ts';
@@ -17,6 +18,8 @@ export interface CoreContext {
   config: Config;
   db: Db;
   keyCipher: LicenseKeyCipher;
+  /** Encrypts the admin TOTP secrets and the SMTP password with the same KEY_ENC_SECRET. */
+  secretBox: SecretBox;
   clock: Clock;
 }
 
@@ -37,6 +40,7 @@ export function createCoreContext(config: Config, overrides: ContextOverrides = 
     config,
     db: overrides.db ?? openPool(config.db),
     keyCipher: new LicenseKeyCipher(config.keyEncSecret),
+    secretBox: new SecretBox(config.keyEncSecret),
     clock: overrides.clock ?? systemClock,
   };
 }

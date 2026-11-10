@@ -20,6 +20,12 @@ export const API_ERRORS = {
   unsupported_media_type: { status: 415, message: 'Send JSON with Content-Type: application/json.' },
   rate_limited: { status: 429, message: 'Too many requests. Try again later.' },
 
+  // The admin API (W2)
+  not_signed_in: { status: 401, message: 'Sign in to continue.' },
+  invalid_credentials: { status: 401, message: 'Wrong username, password or code.' },
+  forbidden: { status: 403, message: 'The server refused this request.' },
+  conflict: { status: 409, message: 'This action does not apply to the record in its current state.' },
+
   // The license (names from NOTCHOS-LICENSE-PLAN.md)
   invalid_key: { status: 404, message: 'This license key is not valid.' },
   revoked: { status: 403, message: 'This license has been revoked.' },
@@ -41,6 +47,11 @@ export type ApiErrorName = keyof typeof API_ERRORS;
 
 export function sendOk(reply: FastifyReply, clock: Clock, body: Record<string, unknown>): FastifyReply {
   return reply.code(200).send({ ...body, server_time: toIso(clock.now()) });
+}
+
+/** HTTP 201 with the same body shape as sendOk (a created record). */
+export function sendCreated(reply: FastifyReply, clock: Clock, body: Record<string, unknown>): FastifyReply {
+  return reply.code(201).send({ ...body, server_time: toIso(clock.now()) });
 }
 
 export function sendError(
