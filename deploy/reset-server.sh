@@ -45,10 +45,15 @@ echo "==> admin: npm ci + build (base /admin/, API /admin-api)"
 
 echo "==> publish static → public/"
 mkdir -p public/downloads public/admin
-rsync -a --delete site/dist/ public/
-# Keep downloads/ across site sync
-mkdir -p public/downloads
+# Do NOT --delete the whole public/ tree: that wipes admin/ + downloads/.
+rsync -a \
+  --exclude 'admin' \
+  --exclude 'downloads' \
+  --delete \
+  site/dist/ public/
 rsync -a --delete admin/dist/ public/admin/
+mkdir -p public/downloads
+chown -R www:www public || true
 
 echo "==> migrate database"
 (
