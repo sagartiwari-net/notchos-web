@@ -69,7 +69,7 @@ export const publicRoutes: FastifyPluginAsync<{ ctx: AppContext }> = async (app,
 
     if (!outcome.ok) {
       if (outcome.error === 'invalid_email') {
-        return sendError(reply, clock, 'bad_request', {}, 'Enter a valid email address.');
+        return sendError(reply, clock, 'bad_request', {}, outcome.message ?? 'Enter a valid email address.');
       }
       return sendRateLimited(reply, clock, outcome.retryAfterSec ?? 120);
     }
@@ -77,6 +77,7 @@ export const publicRoutes: FastifyPluginAsync<{ ctx: AppContext }> = async (app,
     return sendOk(reply, clock, {
       status: outcome.status,
       email: outcome.email,
+      download_url: outcome.downloadUrl,
     });
   };
 

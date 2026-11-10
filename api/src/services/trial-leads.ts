@@ -5,6 +5,7 @@ import type { Db } from '../db/pool.ts';
 import { isDuplicateKeyError, selectOne, withTransaction, write } from '../db/pool.ts';
 import { parseMailConfig } from '../emails/mail-config.ts';
 import { sendTemplate } from '../emails/mailer.ts';
+import { guardEmail, guardMessage, type EmailGuardFail } from '../lib/email-guard.ts';
 import type { Clock } from '../lib/time.ts';
 
 export interface TrialLeadDeps {
@@ -17,19 +18,19 @@ export type TrialLeadOutcome =
       ok: true;
       status: 'mailed' | 'resent' | 'has_license';
       email: string;
+      /** Always returned so the site can offer a direct download when SMTP is off. */
+      downloadUrl: string;
       mailPath?: string;
     }
-  | { ok: false; error: 'invalid_email' | 'rate_limited'; retryAfterSec?: number };
+  | {
+      ok: false;
+      error: 'invalid_email' | 'rate_limited';
+      message?: string;
+      retryAfterSec?: number;
+    };
 
 const RESEND_COOLDOWN_MS = 2 * 60 * 1000;
 const RESEND_MAX_PER_DAY = 5;
-
-function normalizeLeadEmail(input: string): string | null {
-  const email = input.trim().toLowerCase();
-  if (email.length < 3 || email.length > 254) return null;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
-  return email;
-}
 
 async function downloadUrl(db: Db, fallback: string): Promise<string> {
   const row = await selectOne<{ value: string }>(db, 'SELECT value FROM settings WHERE name = ?', ['download_url']);
@@ -57,14 +58,18 @@ export async function submitTrialLead(
   deps: TrialLeadDeps,
   input: { email: string; ip: string | null; userAgent: string | null; resend?: boolean },
 ): Promise<TrialLeadOutcome> {
-  const email = normalizeLeadEmail(input.email);
-  if (email === null) return { ok: false, error: 'invalid_email' };
+  const guarded = await guardEmail(input.email);
+  if (!guarded.ok) {
+    return { ok: false, error: 'invalid_email', message: guardMessage(guarded) };
+  }
+  const email = guarded.email;
 
   const mail = parseMailConfig();
   const now = deps.clock.now();
+  const link = await downloadUrl(deps.db, mail.downloadUrl);
 
   if (await hasActiveLicense(deps.db, email, now)) {
-    return { ok: true, status: 'has_license', email };
+    return { ok: true, status: 'has_license', email, downloadUrl: link };
   }
   const ua = input.userAgent === null || input.userAgent === '' ? null : input.userAgent.slice(0, 512);
 
@@ -133,7 +138,6 @@ export async function submitTrialLead(
     return { ok: false, error: result.error, retryAfterSec: result.retryAfterSec };
   }
 
-  const link = await downloadUrl(deps.db, mail.downloadUrl);
   const sent = await sendTemplate(mail, 'trial_download', {
     email,
     downloadUrl: link,
@@ -146,6 +150,9 @@ export async function submitTrialLead(
     ok: true,
     status: result.isResend ? 'resent' : 'mailed',
     email,
+    downloadUrl: link,
     mailPath: sent.path,
   };
 }
+
+export type { EmailGuardFail };

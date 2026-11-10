@@ -8,8 +8,8 @@ import Simple from '../layouts/Simple.astro';
 >
   <h1 class="simple__title">Start free trial</h1>
   <p class="simple__lead">
-    Enter your email. We send the download link. Install NotchOS, then tap <strong>Start free trial</strong> in the
-    app — the trial locks to that Mac (one trial per device).
+    Enter your email for the download link. The <strong>7-day trial starts inside the Mac app</strong> (not on this
+    page) and locks to that Mac — one trial per device.
   </p>
 
   <form class="simple__form" id="trial-lead-form" novalidate>
@@ -27,17 +27,22 @@ import Simple from '../layouts/Simple.astro';
     <input class="simple__hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
     <button class="btn btn--primary" type="submit" id="trial-submit">Email me the download link</button>
     <p class="simple__status" id="trial-status" role="status" aria-live="polite"></p>
+    <p id="trial-download-wrap" hidden>
+      <a class="btn btn--primary" id="trial-download" href="/downloads/NotchOS-0.7.0.dmg">Download NotchOS now</a>
+    </p>
   </form>
 
   <ol class="simple__steps">
-    <li>Open the DMG and drag NotchOS to Applications.</li>
+    <li>Download and open the DMG → drag NotchOS to Applications.</li>
     <li>
-      On macOS Sequoia+, if Gatekeeper blocks the first open: System Settings → Privacy &amp; Security → Open
-      Anyway.
+      On macOS Sequoia+, if Gatekeeper blocks: System Settings → Privacy &amp; Security → Open Anyway.
     </li>
-    <li>Launch NotchOS → Start free trial (needs internet once).</li>
+    <li>Launch NotchOS → tap <strong>Start free trial</strong> (needs internet once). That creates the Trials row.</li>
   </ol>
-  <p class="simple__note">Requires Apple silicon and macOS 12 or later. Already have a key? <a href="/download">Download</a> or <a href="/recover">Recover key</a>.</p>
+  <p class="simple__note">
+    Temporary / disposable inboxes are blocked. Requires Apple silicon and macOS 26 or later.
+    Already have a key? <a href="/download">Download</a> or <a href="/recover">Recover key</a>.
+  </p>
   <p>
     <a class="btn btn--ghost" href="/download">Download without email</a>
     <a class="btn btn--ghost" href="/#pricing">See pricing</a>
@@ -49,11 +54,24 @@ import Simple from '../layouts/Simple.astro';
   const emailInput = document.getElementById('trial-email');
   const statusEl = document.getElementById('trial-status');
   const submitBtn = document.getElementById('trial-submit');
+  const downloadWrap = document.getElementById('trial-download-wrap');
+  const downloadLink = document.getElementById('trial-download');
 
-  if (form instanceof HTMLFormElement && emailInput instanceof HTMLInputElement && statusEl && submitBtn instanceof HTMLButtonElement) {
+  if (
+    form instanceof HTMLFormElement &&
+    emailInput instanceof HTMLInputElement &&
+    statusEl &&
+    submitBtn instanceof HTMLButtonElement
+  ) {
     const setStatus = (message, kind) => {
       statusEl.textContent = message;
       statusEl.dataset.kind = kind;
+    };
+
+    const showDownload = (url) => {
+      if (!(downloadWrap instanceof HTMLElement) || !(downloadLink instanceof HTMLAnchorElement)) return;
+      if (typeof url === 'string' && url !== '') downloadLink.href = url;
+      downloadWrap.hidden = false;
     };
 
     form.addEventListener('submit', async (event) => {
@@ -68,6 +86,7 @@ import Simple from '../layouts/Simple.astro';
       const company = new FormData(form).get('company');
       submitBtn.disabled = true;
       setStatus('Sending…', 'pending');
+      if (downloadWrap instanceof HTMLElement) downloadWrap.hidden = true;
 
       try {
         const res = await fetch('/api/trial-lead', {
@@ -88,15 +107,21 @@ import Simple from '../layouts/Simple.astro';
 
         if (body.status === 'has_license') {
           setStatus('This email already has a NotchOS license. Use Recover key if you need it resent.', 'ok');
+          showDownload(body.download_url);
           return;
         }
         if (body.status === 'resent') {
-          setStatus('We sent the download link again. Check your inbox.', 'ok');
+          setStatus('Link ready. If mail is not set up yet, use Download below — then start the trial in the app.', 'ok');
+          showDownload(body.download_url);
           return;
         }
-        setStatus('Check your email for the download link. Then install and start the trial in the app.', 'ok');
+        setStatus(
+          'Link ready. Check email if configured; otherwise use Download below. Trial starts only after you tap Start free trial in the app.',
+          'ok',
+        );
+        showDownload(body.download_url);
       } catch {
-        setStatus('Could not reach the server. Is the API running on port 4310?', 'error');
+        setStatus('Could not reach the server. Try again in a moment.', 'error');
       } finally {
         submitBtn.disabled = false;
       }
