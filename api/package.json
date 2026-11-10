@@ -5,7 +5,7 @@
   "description": "NotchOS license server: app-facing license routes, CLI and migrations",
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "node --watch src/server.ts",

@@ -165,7 +165,7 @@ const purchase_lifetime: EmailPreset = {
   summary: 'Lifetime purchase — key email',
   render(raw): RenderedEmail {
     const vars = withDefaults(raw);
-    const { downloadUrl, pricingUrl, siteUrl, supportEmail } = urls(vars);
+    const { downloadUrl, siteUrl, supportEmail } = urls(vars);
     const key = vars.key ?? 'NOS-XXXXX-XXXXX-XXXXX-XXXXX';
     const title = 'Your NotchOS Lifetime key';
     const bodyHtml =

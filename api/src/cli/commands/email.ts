@@ -3,10 +3,10 @@ import { parseMailConfig } from '../../emails/mail-config.ts';
 import { previewTemplate, sendTemplate } from '../../emails/mailer.ts';
 import { EMAIL_TEMPLATE_IDS, getPreset, sampleVars } from '../../emails/presets.ts';
 import type { EmailTemplateId } from '../../emails/types.ts';
-import type { CliIo, Command } from '../command.ts';
+import type { Command } from '../command.ts';
 import { UsageError } from '../command.ts';
 
-function parse(args: string[], options: NonNullable<Parameters<typeof parseArgs>[0]>['options']) {
+function parse<T extends NonNullable<Parameters<typeof parseArgs>[0]>['options']>(args: string[], options: T) {
   try {
     return parseArgs({ args, options, allowPositionals: true, strict: true });
   } catch (err) {
