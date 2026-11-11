@@ -1,8 +1,37 @@
 ---
 import Simple from '../layouts/Simple.astro';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const version = '0.8.1';
-const dmgHref = `/downloads/NotchOS-${version}.dmg`;
+const version = '0.8.2';
+const dmgName = `NotchOS-${version}.dmg`;
+const dmgHref = `/downloads/${dmgName}`;
+
+/** Best-effort size for the download CTA (bytes → human). */
+function formatBytes(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return '';
+  const mb = n / (1024 * 1024);
+  if (mb >= 10) return `${mb.toFixed(0)} MB`;
+  return `${mb.toFixed(1)} MB`;
+}
+
+const candidates = [
+  path.resolve(`public/downloads/${dmgName}`),
+  path.resolve(`../public/downloads/${dmgName}`),
+  // Local Mac artifact while building the site before server fetch-dmg.
+  path.resolve('../../Lumen/dist/' + dmgName),
+];
+let dmgBytes = 0;
+for (const p of candidates) {
+  try {
+    dmgBytes = fs.statSync(p).size;
+    if (dmgBytes > 0) break;
+  } catch {
+    /* try next */
+  }
+}
+// Known staging size when the file isn't on disk at Astro build time.
+const dmgSizeLabel = formatBytes(dmgBytes) || '~5.1 MB';
 ---
 
 <Simple title="Download NotchOS" description="Download NotchOS for Apple silicon Macs running macOS 26 or later.">
@@ -12,7 +41,11 @@ const dmgHref = `/downloads/NotchOS-${version}.dmg`;
     purchase.
   </p>
   <p>
-    <a class="btn btn--primary" href={dmgHref} download>Download NotchOS {version} (.dmg)</a>
+    <a class="btn btn--primary" href={dmgHref} download={dmgName}>Download NotchOS {version} (.dmg)</a>
+  </p>
+  <p class="simple__note">
+    File size about <strong>{dmgSizeLabel}</strong> · direct link shows progress (MB left / time) in Chrome when the
+    download isn’t resumed from a partial file.
   </p>
   <p>
     <a class="btn btn--ghost" href="/trial">Start free trial (email me the link)</a>
