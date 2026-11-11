@@ -4,12 +4,12 @@ set -euo pipefail
 #   bash deploy/fetch-dmg.sh
 #   GH_TOKEN=ghp_xxx bash deploy/fetch-dmg.sh   # if the release URL is private
 
-VERSION=0.8.0
+VERSION=0.8.1
 TAG=v${VERSION}-staging
 NAME=NotchOS-${VERSION}.dmg
 OUT=/www/wwwroot/notch.sagartiwari.net/public/downloads/${NAME}
 LEGACY=/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.7.0.dmg
-PREV=/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.7.9.dmg
+PREV=/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.8.0.dmg
 REPO=sagartiwari-net/notchos-web
 PUBLIC_URL="https://github.com/${REPO}/releases/download/${TAG}/${NAME}"
 
