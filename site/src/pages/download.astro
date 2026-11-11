@@ -3,7 +3,7 @@ import Simple from '../layouts/Simple.astro';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const version = '0.8.6';
+const version = '0.8.7';
 const dmgName = `NotchOS-${version}.dmg`;
 const dmgHref = `/downloads/${dmgName}`;
 
@@ -44,8 +44,8 @@ const dmgSizeLabel = formatBytes(dmgBytes) || '~5.1 MB';
     <a class="btn btn--primary" href={dmgHref} download={dmgName}>Download NotchOS {version} (.dmg)</a>
   </p>
   <p class="simple__note">
-    File size about <strong>{dmgSizeLabel}</strong> · direct link shows progress (MB left / time) in Chrome when the
-    download isn’t resumed from a partial file.
+    File size about <strong>{dmgSizeLabel}</strong>. Use this page’s button for a fresh download — if Chrome says
+    “Resuming…”, cancel that entry and start again so total size and time remaining show correctly.
   </p>
   <p>
     <a class="btn btn--ghost" href="/trial">Start free trial (email me the link)</a>
