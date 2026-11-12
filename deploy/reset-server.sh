@@ -37,24 +37,31 @@ fi
 export PATH="$(dirname "$NODE_BIN"):$PATH"
 echo "==> using $($NODE_BIN -v) ($NODE_BIN)"
 
+npm_ci_or_install() {
+  if ! npm ci; then
+    echo "warn: npm ci failed in $(pwd) — falling back to npm install" >&2
+    npm install
+  fi
+}
+
 echo "==> api: npm ci + build"
 (
   cd api
-  npm ci
+  npm_ci_or_install
   npm run build
 )
 
 echo "==> site: npm ci + build"
 (
   cd site
-  npm ci
+  npm_ci_or_install
   npm run build
 )
 
 echo "==> admin: npm ci + build (base /admin/, API /admin-api)"
 (
   cd admin
-  npm ci
+  npm_ci_or_install
   ADMIN_BASE=/admin/ VITE_ADMIN_API_BASE=/admin-api npm run build
 )
 
