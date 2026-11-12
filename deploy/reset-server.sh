@@ -37,10 +37,15 @@ fi
 export PATH="$(dirname "$NODE_BIN"):$PATH"
 echo "==> using $($NODE_BIN -v) ($NODE_BIN)"
 
+# aaPanel / China VPS images often point npm at npmmirror; that CDN 404s some
+# packages (e.g. enhanced-resolve). Always use the official registry for builds.
+export npm_config_registry="${npm_config_registry:-https://registry.npmjs.org/}"
+echo "==> npm registry: $npm_config_registry"
+
 npm_ci_or_install() {
-  if ! npm ci; then
+  if ! npm ci --registry="$npm_config_registry"; then
     echo "warn: npm ci failed in $(pwd) — falling back to npm install" >&2
-    npm install
+    npm install --registry="$npm_config_registry"
   fi
 }
 
