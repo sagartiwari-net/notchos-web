@@ -1,0 +1,55 @@
+---
+/**
+ * "Compare NotchOS vs N Mac apps": every comparison page, grouped by the job the app does,
+ * one pill each. It stands at the foot of every article and index page, so a reader on any
+ * page is one click from any other comparison, and every comparison is linked from everywhere.
+ *
+ * The list comes from the catalog (src/data/vs-apps.ts); nothing is written by hand here.
+ * `current` is the slug of the page the block is on: that pill is shown but is not a link.
+ */
+import { VS_APPS, VS_CATEGORIES } from '../../data/vs-apps';
+
+interface Props {
+  current?: string;
+}
+
+const { current } = Astro.props;
+const groups = VS_CATEGORIES.map((cat) => ({
+  ...cat,
+  apps: VS_APPS.filter((app) => app.category === cat.id),
+})).filter((group) => group.apps.length > 0);
+---
+
+<section class="wrap vs-mesh" aria-labelledby="vs-mesh-title">
+  <header class="vs-mesh__head">
+    <h2 class="vs-mesh__title" id="vs-mesh-title">Compare NotchOS vs {VS_APPS.length} Mac apps</h2>
+    <p class="vs-mesh__lead">
+      One island under the notch, next to the single-purpose apps people run for the same jobs. Pick an app for
+      the side-by-side.
+    </p>
+  </header>
+  <div class="vs-mesh__grid">
+    {
+      groups.map((group) => (
+        <section class="vs-mesh__card">
+          <h3 class="vs-mesh__cat">
+            <a href={`/vs#${group.id}`}>{group.title}</a>
+          </h3>
+          <div class="vs-mesh__pills">
+            {group.apps.map((app) =>
+              app.slug === current ? (
+                <span class="vs-pill vs-pill--here" aria-current="page">
+                  vs {app.name}
+                </span>
+              ) : (
+                <a class="vs-pill" href={`/vs/${app.slug}`}>
+                  vs {app.name}
+                </a>
+              ),
+            )}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</section>

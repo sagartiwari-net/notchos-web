@@ -6,14 +6,16 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  /** A page that lays itself out in two columns (discount) gets the room for it. */
+  wide?: boolean;
 }
 
-const { title, description = 'NotchOS for Mac.' } = Astro.props;
+const { title, description = 'NotchOS for Mac.', wide = false } = Astro.props;
 ---
 
 <Base title={title} description={description}>
   <Nav />
-  <main id="main" class="wrap simple">
+  <main id="main" class:list={['wrap', 'simple', 'content--compare', wide && 'simple--wide']}>
     <slot />
   </main>
   <Footer />

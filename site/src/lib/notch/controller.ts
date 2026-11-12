@@ -173,7 +173,8 @@ function mixFrames(a: Frame, b: Frame, t: number, e: number, out: Frame) {
   stage(a.right, b.right, t, chipsHidden, out.right);
 }
 
-const WIDE_MIN_FACES = 700;
+/** Host must fit open width + side air before we prefer the wide (app) layout. */
+const WIDE_MIN_FACES = 960;
 const WIDE_MIN_CLOSED = 440;
 
 export class NotchController {

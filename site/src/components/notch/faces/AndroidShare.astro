@@ -1,0 +1,49 @@
+---
+/**
+ * Android Share face — Nearby / QR from the current LipTabStrip shortcut.
+ * Source: Lumen SystemToolSheets Nearby / Android share sheet.
+ */
+import FaceHead from '../FaceHead.astro';
+import Icon from '../../Icon.astro';
+---
+
+<div class="share">
+  <FaceHead icon="phone-arrow" title="Android Share" tint="color-plate-teal">
+    <span class="chip chip--primary">Nearby</span>
+    <span class="chip chip--secondary">QR</span>
+  </FaceHead>
+
+  <div class="share__body">
+    <div class="share__panel">
+      <div class="share__title">Send to your phone</div>
+      <p class="share__lead">Drop a file on the notch, or pick one below. Nearby finds Android devices on the same Wi‑Fi.</p>
+      <div class="share__actions">
+        <span class="chip chip--primary">Choose files</span>
+        <span class="chip chip--secondary">Paste from clipboard</span>
+      </div>
+      <div class="share__list">
+        <div class="row">
+          <span class="row__thumb"><Icon name="doc" size={14} /></span>
+          <span class="row__text">
+            <span class="row__title">Launch-notes.pdf</span>
+            <span class="row__meta">248 KB · ready</span>
+          </span>
+        </div>
+        <div class="row">
+          <span class="row__thumb"><Icon name="image" size={14} /></span>
+          <span class="row__text">
+            <span class="row__title">Poster.png</span>
+            <span class="row__meta">1.2 MB · ready</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="share__qr" aria-hidden="true">
+      <div class="share__qr-frame">
+        <Icon name="qr" size={72} weight={1.6} />
+      </div>
+      <div class="share__pin">PIN · 4821</div>
+      <div class="share__hint">Scan on Android · same Wi‑Fi</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import VsHub from '../../components/vs/VsHub.astro';
+import { VS_APPS } from '../../data/vs-apps';
+
+const posts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const vsCount = VS_APPS.length;
+---
+
+<Base
+  title="NotchOS guides — Mac notch, Dynamic Island & comparisons"
+  description="Guides and honest comparisons for Mac notch apps: Dynamic Island for MacBook, free options, clipboard, teleprompter, timers, and Android share."
+  path="/blog"
+>
+  <Nav />
+  <main id="main" class="wrap content content--compare">
+    <h1 class="content__h1">Guides &amp; comparisons</h1>
+    <p class="content__lead">
+      How to put the MacBook notch to work — and how NotchOS compares to other Dynamic Island apps for Mac. We
+      disclose when we write about our own product. No invented reviews.
+    </p>
+    <ul class="postlist">
+      {
+        posts.map((post) => (
+          <li class="postlist__item">
+            <a class="postlist__link" href={`/blog/${post.id}`}>
+              <span class="postlist__title">{post.data.title}</span>
+              <span class="postlist__desc">{post.data.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="content__more">
+      Also see <a href="/best-mac-notch-apps">best Mac notch apps</a>,
+      <a href="/alternatives">alternatives</a>, and the full
+      <a href="/vs">Compare vs {vsCount} Mac apps</a> hub.
+    </p>
+  </main>
+  <VsHub />
+  <Footer />
+</Base>

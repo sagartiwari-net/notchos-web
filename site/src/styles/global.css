@@ -3,6 +3,7 @@
    script rebuilds the stylesheet in dev. */
 @import 'tailwindcss' source('../');
 @import './tokens.css';
+@import './compare-theme.css';
 @import './notch.css';
 @import './faces.css';
 @import './page.css';

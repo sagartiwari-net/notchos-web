@@ -1,63 +1,43 @@
 ---
 /**
- * Timers face: Pomodoro pane with the ring, plus the Keep Awake row.
- * Source: Lumen/Sources/ClockChrome.swift (TimersFace, PomoPane, awakeRow).
- * The countdown is the same demo clock the closed timer chip shows (live.ts).
+ * Timers face — modes on the header row; Stopwatch pane (current ClockChrome).
+ * Source: Lumen/Sources/ClockChrome.swift (TimersFace, TickPane, awakeRow).
  */
-import FaceHead from '../FaceHead.astro';
+import Plate from '../Plate.astro';
 import Icon from '../../Icon.astro';
-import Ring from '../Ring.astro';
 
-const steppers = [
-  ['Focus', '25m'],
-  ['Short', '5m'],
-  ['Long', '15m'],
-];
 const awake = ['30m', '1h', '2h', '4h', 'Until off'];
 ---
 
 <div class="timers">
-  <FaceHead icon="timer" title="Timers" tint="color-plate-amber" />
-  <div class="chips">
-    <span class="chip is-on">Pomodoro</span>
+  <div class="timers__head">
+    <Plate icon="timer" tint="color-plate-amber" active />
+    <span class="timers__label">Timers</span>
+    <span class="chip">Pomodoro</span>
     <span class="chip">Countdown</span>
-    <span class="chip">Stopwatch</span>
+    <span class="chip is-on">Stopwatch</span>
   </div>
-  <div class="pomo">
-    <div class="pomo__info">
-      <div class="pomo__phase">Focus</div>
-      <div class="pomo__today">Today 2</div>
-      <div class="pomo__dots"><i class="is-on"></i><i class="is-on"></i><i></i><i></i></div>
-      <div class="pomo__steps">
-        {
-          steppers.map(([label, value]) => (
-            <div class="pomo__step">
-              <span>
-                {label} {value}
-              </span>
-              <i class="tiny">−</i>
-              <i class="tiny">+</i>
-            </div>
-          ))
-        }
-      </div>
+
+  <div class="tick">
+    <div class="tick__laps">
+      <div class="tick__laps-title">Laps</div>
+      <div class="tick__empty">No laps yet</div>
     </div>
-    <Ring size={118} width={7} progress={0.264} name="timer" class="pomo__ring">
-      <span class="pomo__time" data-live="timer-text">18:24</span>
-      <span class="pomo__caption">Focus</span>
-    </Ring>
-    <div class="pomo__actions">
-      <span class="pill pill--wide">Pause</span>
-      <span class="pomo__pair">
-        <span class="pill pill--small">Reset</span>
-        <span class="pill pill--small">Skip</span>
-      </span>
+    <div class="tick__clock">
+      <div class="tick__time">0:00.0</div>
+      <div class="tick__caption">Stopwatch</div>
+    </div>
+    <div class="tick__actions">
+      <span class="pill pill--wide">Start</span>
+      <span class="pill pill--wide pill--muted">Lap</span>
+      <span class="pill pill--wide pill--muted">Reset</span>
     </div>
   </div>
+
   <div class="awake">
     <Icon name="moon" size={13} />
     <span class="awake__label">Keep Awake</span>
     <span class="awake__gap"></span>
-    {awake.map((label) => <span class="chip">{label}</span>)}
+    {awake.map((label) => <span class="chip chip--small">{label}</span>)}
   </div>
 </div>

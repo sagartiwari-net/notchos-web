@@ -8,6 +8,7 @@ import {
   MailIcon,
   ScrollTextIcon,
   SettingsIcon,
+  Share2Icon,
   WebhookIcon,
   type LucideIcon,
 } from 'lucide-react'
@@ -56,6 +57,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: ArrowRightLeftIcon,
         to: '/seat-moves',
       },
+      { title: 'Social shares', icon: Share2Icon, to: '/social' },
     ],
   },
   {

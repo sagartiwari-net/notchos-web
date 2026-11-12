@@ -15,3 +15,8 @@ dist
 # local noise
 .DS_Store
 *.log
+
+# Mac app binaries (upload to server public/downloads/; never version in git)
+*.dmg
+public/downloads/
+site/public/downloads/

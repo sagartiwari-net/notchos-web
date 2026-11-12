@@ -1,0 +1,72 @@
+---
+import Base from './Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import VsBuyBar from '../components/vs/VsBuyBar.astro';
+import VsHub from '../components/vs/VsHub.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  ogType?: 'website' | 'article';
+  eyebrow?: string;
+  /** Show top Try/Buy bar (vs pages) */
+  buyBar?: boolean;
+  competitor?: string;
+  wide?: boolean;
+  /** The "Compare NotchOS vs N Mac apps" block under the article. On by default. */
+  hub?: boolean;
+  /** On a /vs page: its own slug, so its pill in the block is not a link to itself. */
+  hubCurrent?: string;
+  /** @deprecated — site is light everywhere; ignored */
+  compare?: boolean;
+}
+
+const {
+  title,
+  description,
+  path,
+  ogType = 'article',
+  eyebrow,
+  buyBar = false,
+  competitor,
+  wide = false,
+  hub = true,
+  hubCurrent,
+} = Astro.props;
+---
+
+<Base title={title} description={description} path={path} ogType={ogType}>
+  <Nav />
+  <main id="main" class:list={['wrap', 'content', 'content--compare', wide && 'content--wide']}>
+    {buyBar && <VsBuyBar competitor={competitor} />}
+    {
+      eyebrow && (
+        <p class="content__eyebrow">
+          <a href="/blog">Guides</a>
+          <span aria-hidden="true"> · </span>
+          <a href="/vs">Compare</a>
+          <span aria-hidden="true"> · </span>
+          {eyebrow}
+        </p>
+      )
+    }
+    <article class="prose">
+      <slot />
+    </article>
+    <aside class="content__cta" aria-label="Try NotchOS">
+      <h2 class="content__cta-title">Try NotchOS free for 7 days</h2>
+      <p class="content__cta-lead">
+        Apple silicon, macOS 26 or later. No card for the trial. Lifetime is $15; Monthly is $3.
+      </p>
+      <div class="content__cta-actions">
+        <a class="btn btn--primary" href="/trial">Start free trial</a>
+        <a class="btn btn--ghost" href="/download">Download</a>
+        <a class="btn btn--ghost" href="/#pricing">Buy NotchOS $15</a>
+      </div>
+    </aside>
+  </main>
+  {hub && <VsHub current={hubCurrent} />}
+  <Footer />
+</Base>

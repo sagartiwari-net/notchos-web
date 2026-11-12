@@ -381,7 +381,7 @@ function SettingsForm({ settings }: { settings: Settings }) {
             <SettingRow
               id="settings-download-url"
               label="Download link"
-              description="The DMG that the site and the purchase email link to. An https link."
+              description="Use the fixed latest URL (https://notch.sagartiwari.net/downloads/NotchOS.dmg) — never a versioned path, so old emails keep working."
               error={errorFor('download_url')}
             >
               <Input
@@ -400,7 +400,7 @@ function SettingsForm({ settings }: { settings: Settings }) {
             <SettingRow
               id="settings-app-version"
               label="Current app version"
-              description="The version that link downloads."
+              description="Displayed version for the current NotchOS.dmg (the download link above stays fixed)."
               error={errorFor('app_version')}
             >
               <Input

@@ -8,12 +8,12 @@
  */
 
 .notch {
-  /* wide = the app's own sizes */
-  --open-w: 740px;
+  /* wide = current app sizes (ShelfFace.preferredOpen ~860–960, faceOpenHeight 320) */
+  --open-w: 900px;
   --pad: 26px; /* chrome .padding(.horizontal, 26) */
   --tab-top: 43px; /* topBand = max(restHeight + 12, 40) */
   --tab-h: 28px; /* NotchIconSize.compact */
-  --tab-gap: 14px; /* 34 pt hit frames, 8 pt apart, around 28 pt plates */
+  --tab-gap: 8px; /* 12 tabs: tighter than the old 10-tab gap */
   --face-top: 77px; /* tab-top + tab-h + 6 */
   --face-bottom: 36px; /* bottomBand */
   --lower-open: 28px;
@@ -21,7 +21,7 @@
   --housing-h: 32px;
   --housing-u: 7px;
   --housing-l: 12px;
-  --clip-w: 760px;
+  --clip-w: 960px; /* must match tokens.ts CLIP.w */
   --clip-h: 600px;
 
   position: absolute;

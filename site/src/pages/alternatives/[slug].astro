@@ -1,0 +1,31 @@
+---
+import { getCollection, render } from 'astro:content';
+import Content from '../../layouts/Content.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('alternatives');
+  return pages
+    .filter((p) => !p.data.draft)
+    .map((page) => ({
+      params: { slug: page.id },
+      props: { page },
+    }));
+}
+
+const { page } = Astro.props;
+const { Content: Body } = await render(page);
+---
+
+<Content
+  title={page.data.title}
+  description={page.data.description}
+  path={`/alternatives/${page.id}`}
+  eyebrow="Alternatives"
+>
+  <h1>{page.data.title}</h1>
+  <p class="prose__meta">
+    Official site: <a href={page.data.competitorUrl} rel="noopener noreferrer">{page.data.competitorUrl.replace(/^https?:\/\//, '')}</a>
+    · {page.data.price} · {page.data.macos}
+  </p>
+  <Body />
+</Content>

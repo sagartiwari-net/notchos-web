@@ -103,16 +103,17 @@ describe('migration runner', () => {
 
   it('applies a new file exactly once, in number order', async () => {
     const dir = copyOfMigrations('next');
-    writeFileSync(join(dir, '004_second.sql'), 'CREATE TABLE IF NOT EXISTS t_second (id INT PRIMARY KEY);\n');
+    // Real folder already has 001–003; append 004 then 005.
+    writeFileSync(join(dir, '005_second.sql'), 'CREATE TABLE IF NOT EXISTS t_second (id INT PRIMARY KEY);\n');
     writeFileSync(
-      join(dir, '003_first.sql'),
+      join(dir, '004_first.sql'),
       'CREATE TABLE IF NOT EXISTS t_first (id INT PRIMARY KEY);\nINSERT INTO t_first (id) VALUES (1), (2);\n',
     );
 
-    expect(await run(dir)).toEqual(['003_first.sql', '004_second.sql']);
+    expect(await run(dir)).toEqual(['004_first.sql', '005_second.sql']);
     expect(await run(dir)).toEqual([]);
     expect(await admin.query('SELECT COUNT(*) AS n FROM t_first')).toEqual([{ n: 2 }]);
-    expect((await readAppliedMigrations(api)).map((row) => row.version)).toEqual([1, 2, 3, 4]);
+    expect((await readAppliedMigrations(api)).map((row) => row.version)).toEqual([1, 2, 3, 4, 5]);
   });
 
   it('refuses to continue when an applied migration was edited', async () => {
@@ -120,17 +121,17 @@ describe('migration runner', () => {
     const second = readMigrationFiles(MIGRATIONS_DIR).find((file) => file.version === 2);
     expect(second).toBeDefined();
     writeFileSync(join(dir, second!.name), `${second!.sql}\n-- edited\n`);
-    writeFileSync(join(dir, '005_never.sql'), 'CREATE TABLE t_never (id INT PRIMARY KEY);\n');
+    writeFileSync(join(dir, '006_never.sql'), 'CREATE TABLE t_never (id INT PRIMARY KEY);\n');
 
     await expect(run(dir)).rejects.toThrow(MigrationError);
     await expect(run(dir)).rejects.toThrow(new RegExp(`${second!.name.replace('.', '\\.')} was changed after it was applied`));
-    // Nothing after the problem was applied.
-    expect((await readAppliedMigrations(api)).map((row) => row.version)).toEqual([1, 2, 3, 4]);
+    // Nothing after the problem was applied. Previous test left 004+005 on this shared DB.
+    expect((await readAppliedMigrations(api)).map((row) => row.version)).toEqual([1, 2, 3, 4, 5]);
     await expect(migrationStatus(api, dir)).rejects.toThrow(/changed after it was applied/);
   });
 
   it('refuses a database that is ahead of the code, and numbers that go backwards', async () => {
-    // The database has 003 and 004 from the previous test; the real folder only knows 001–002.
+    // Shared DB has 004+005 from earlier; real folder only knows 001–003.
     await expect(migrationStatus(api, MIGRATIONS_DIR)).rejects.toThrow(/this code is older than the database/);
 
     const [first] = readMigrationFiles(MIGRATIONS_DIR);
@@ -189,12 +190,16 @@ describe('schema of 001_init.sql (WEB plan section 4)', () => {
       'admin_users',
       'audit_log',
       'checkouts',
+      'coupons',
+      'coupon_redemptions',
       'email_log',
       'events',
+      'invoices',
       'licenses',
       'payments',
       'seat_moves',
       'settings',
+      'social_share_submissions',
       'trials',
       'trial_leads',
       'webhook_events',
@@ -256,7 +261,15 @@ describe('schema of 001_init.sql (WEB plan section 4)', () => {
       'detail',
       'created_at',
     ]);
-    expect(columns.checkouts).toEqual(['paypal_order_id', 'plan', 'amount', 'currency', 'status', 'created_at']);
+    expect(columns.checkouts).toEqual([
+      'paypal_order_id',
+      'plan',
+      'amount',
+      'currency',
+      'coupon_code',
+      'status',
+      'created_at',
+    ]);
     expect(columns.payments).toEqual([
       'id', 'license_id', 'kind', 'paypal_id', 'amount', 'currency', 'payer_email', 'payer_id', 'status',
       'raw_json', 'created_at',
@@ -272,10 +285,22 @@ describe('schema of 001_init.sql (WEB plan section 4)', () => {
 
   it('seeds the settings that have a default in the plan', async () => {
     expect(await admin.query('SELECT name, value FROM settings ORDER BY name')).toEqual([
+      { name: 'price_lifetime', value: '15.00' },
+      { name: 'price_monthly', value: '3.00' },
       { name: 'renewal_buffer_hours', value: '24' },
       { name: 'transfer_limit', value: '2' },
       { name: 'trial_days', value: '7' },
     ]);
+  });
+
+  it('creates coupon, social share, and invoice tables', async () => {
+    const tables = await admin.query<Record<string, string>[]>('SHOW TABLES');
+    // Column name varies with database name; flatten values.
+    const names = new Set(tables.map((row) => Object.values(row)[0]!));
+    expect(names.has('coupons')).toBe(true);
+    expect(names.has('social_share_submissions')).toBe(true);
+    expect(names.has('coupon_redemptions')).toBe(true);
+    expect(names.has('invoices')).toBe(true);
   });
 
   it('enforces the uniqueness rules', async () => {
@@ -434,6 +459,6 @@ describe('connection rules', () => {
   it('runs one statement per call: a second statement is a syntax error', async () => {
     const error = await sqlError(() => api.query("SELECT 1; DELETE FROM settings WHERE name <> ''"));
     expect(error.errno).toBe(1064);
-    expect(await admin.query('SELECT COUNT(*) AS n FROM settings')).toEqual([{ n: 3 }]);
+    expect(await admin.query('SELECT COUNT(*) AS n FROM settings')).toEqual([{ n: 5 }]);
   });
 });

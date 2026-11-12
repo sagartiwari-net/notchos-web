@@ -16,7 +16,7 @@ See **[deploy/SERVER.md](deploy/SERVER.md)** for step-by-step commands on aaPane
 
 - Site: `https://notch.sagartiwari.net/`
 - API: `https://notch.sagartiwari.net/v1/`
-- DMG: `https://notch.sagartiwari.net/downloads/NotchOS-0.7.0.dmg`
+- DMG (always latest): `https://notch.sagartiwari.net/downloads/NotchOS.dmg`
 - Admin: `https://notch.sagartiwari.net/admin/` (mock — use `api` CLI for real licenses)
 
 ## Local development

@@ -105,6 +105,7 @@ export NOTCHOS_ENV_FILE=/www/server/notchos/api.env
 npm run license:create -- "$EMAIL" lifetime
 
 echo
-echo "Upload DMG in aaPanel Files to:"
-echo "  $PUBLIC/downloads/NotchOS-0.7.0.dmg"
-echo "Then: https://notch.sagartiwari.net/download"
+echo "Upload DMG (fixed name, always latest) to:"
+echo "  $PUBLIC/downloads/NotchOS.dmg"
+echo "Or: VERSION=x.y.z bash deploy/fetch-dmg.sh"
+echo "Then: https://notch.sagartiwari.net/downloads/NotchOS.dmg"

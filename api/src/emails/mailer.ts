@@ -38,10 +38,16 @@ export function renderTemplate(template: EmailTemplateId, vars: EmailVars, mail:
   return getPreset(template).render(mergeUrls(mail, vars));
 }
 
+export interface MailAttachment {
+  filename: string;
+  content: Buffer;
+}
+
 export async function sendTemplate(
   mail: MailConfig,
   template: EmailTemplateId,
   vars: EmailVars,
+  attachment?: MailAttachment,
 ): Promise<SendResult> {
   const rendered = renderTemplate(template, vars, mail);
   const to = vars.email.trim();
@@ -52,6 +58,9 @@ export async function sendTemplate(
     const textPath = join(mail.dir, `${base}.txt`);
     writeFileSync(htmlPath, rendered.html, 'utf8');
     writeFileSync(textPath, rendered.text, 'utf8');
+    if (attachment) {
+      writeFileSync(join(mail.dir, `${base}-${attachment.filename}`), attachment.content);
+    }
     return { mode: 'file', template, to, subject: rendered.subject, path: htmlPath };
   }
 
@@ -67,6 +76,9 @@ export async function sendTemplate(
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,
+    attachments: attachment
+      ? [{ filename: attachment.filename, content: attachment.content, contentType: 'application/pdf' }]
+      : undefined,
   });
   return {
     mode: 'smtp',

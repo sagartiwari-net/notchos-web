@@ -1,20 +1,30 @@
 ---
+import Notch from './notch/Notch.astro';
+
 const faqs = [
   {
     q: 'Which Macs does NotchOS support?',
-    a: 'Apple silicon Macs running macOS 12 or later. Intel Macs are not supported.',
+    a: 'Apple silicon Macs running macOS 26 or later. Intel Macs and earlier macOS versions are not supported.',
   },
   {
-    q: 'How does the free trial work?',
-    a: 'Enter your email on the site to get the download link, install NotchOS, then Start free trial in the app — no card. Each Mac gets one 7-day trial. When it ends, buy a plan to keep going.',
+    q: 'How does the free trial work without a license key?',
+    a: 'There is no trial key. After you install, Start free trial in the app. Your Mac’s device id is recorded on our server for 7 days. Reinstalling does not start a new trial. Optional email on the download page is only for the link — it does not unlock a second trial.',
+  },
+  {
+    q: 'How much does NotchOS cost?',
+    a: 'Monthly is $3 per month. Lifetime is $15 once. An optional share coupon can take up to 20% off Lifetime only — it never applies to Monthly.',
+  },
+  {
+    q: 'Where is my key sent?',
+    a: 'To the email on your PayPal payment, with the invoice. That is the address you type with the key in NotchOS › Settings › Pro.',
   },
   {
     q: 'Is one key tied to one Mac?',
     a: 'Yes. A key activates on one Mac at a time. You can move it to a new Mac using a transfer (limited), or free the seat from support.',
   },
   {
-    q: 'What do I type to activate?',
-    a: 'The PayPal email that received the key, and the license key itself. Both must match on the server.',
+    q: 'How do share discounts work?',
+    a: 'On Lifetime only: share on LinkedIn, Facebook, Instagram, and X (5% each, max 20%), submit your email and post links, get a one-time code, then apply it at checkout. The code binds to your PayPal email when you pay.',
   },
   {
     q: 'How do I cancel a monthly plan?',
@@ -33,21 +43,84 @@ const faqs = [
     a: 'Refund policy will be published before launch on the Refunds page. Contact support from that page when it is live.',
   },
 ];
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
+    },
+  })),
+};
 ---
 
+<!--
+  Two columns on a wide window: the heading, a picture of the closed notch and the guide links
+  on the left (they stay in view while the answers scroll), the questions on the right. One
+  column on a narrow one: heading, questions, guide links; the picture is left out there, the
+  live-activity cards further up show the same thing. The styles are in page.css, next to
+  .faq__item.
+
+  The picture is the same drawn notch as everywhere else on the page (no photo): a closed lip
+  with something playing in the right ear and three files in the left one. It is built like a
+  live-activity card (.lcard), so it gets the app's dark palette and the audit's pixel check.
+-->
 <section class="section wrap" id="faq" aria-labelledby="faq-title">
-  <header class="section__head">
-    <p class="section__eyebrow">FAQ</p>
-    <h2 class="section__title" id="faq-title">Straight answers</h2>
-  </header>
-  <div class="faq">
-    {
-      faqs.map((item) => (
-        <details class="faq__item">
-          <summary class="faq__q">{item.q}</summary>
-          <p class="faq__a">{item.a}</p>
-        </details>
-      ))
-    }
+  <div class="faq-layout">
+    <div class="faq-side">
+      <header class="faq-head">
+        <p class="section__eyebrow">FAQ</p>
+        <h2 class="section__title" id="faq-title">Straight answers</h2>
+        <p class="section__lead">Trial, pricing, license keys and privacy — the short version.</p>
+      </header>
+      <figure class="lcard faq-shot" data-faq-shot>
+        <div class="lcard__screen faq-shot__screen" aria-hidden="true">
+          <div class="lcard__bar"></div>
+          <Notch id="faq-notch" faces={false} rightChips={['music']} leftChips={['shelf']} right="music" left="shelf" />
+        </div>
+        <figcaption class="faq-shot__text">
+          The closed notch on a Mac: what is playing on the right, files waiting in the Tray on the left.
+        </figcaption>
+      </figure>
+      <nav class="faq-more" aria-label="Guides">
+        <p class="faq-more__title">Guides</p>
+        <ul class="faq-more__list">
+          <li><a href="/blog">Mac notch &amp; Dynamic Island</a></li>
+          <li><a href="/vs">Compare vs Mac apps</a></li>
+          <li><a href="/best-mac-notch-apps">Best Mac notch apps</a></li>
+          <li><a href="/alternatives">Alternatives</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="faq">
+      {
+        faqs.map((item) => (
+          <details class="faq__item">
+            <summary class="faq__q">{item.q}</summary>
+            <p class="faq__a">{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
   </div>
 </section>
+
+<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+<script>
+  import { getNotch } from '../lib/notch';
+
+  // Pointing at the picture swells its notch, the same peek as on the live-activity cards.
+  const shot = document.querySelector<HTMLElement>('[data-faq-shot]');
+  const notch = getNotch(shot?.querySelector('[data-notch]'));
+  if (shot && notch) {
+    shot.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'touch') notch.setState('peek');
+    });
+    shot.addEventListener('pointerleave', () => notch.setState('closed'));
+  }
+</script>

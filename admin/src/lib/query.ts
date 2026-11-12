@@ -6,6 +6,7 @@ import {
   type AuditLogParams,
   type LicenseListParams,
   type Session,
+  type SocialSubmissionListParams,
   type TrialListParams,
 } from '@/api'
 import { forgetAllCreatedKeys } from '@/lib/created-keys'
@@ -30,6 +31,8 @@ export const queryKeys = {
   seatMoveLists: ['seat-moves'] as const,
   seatMoveList: (params: { q?: string; page?: number; page_size?: number }) =>
     ['seat-moves', params] as const,
+  socialLists: ['social-submissions'] as const,
+  socialList: (params: SocialSubmissionListParams) => ['social-submissions', params] as const,
   settings: ['settings'] as const,
   auditLogs: ['audit-log'] as const,
   auditLog: (params: AuditLogParams) => ['audit-log', params] as const,
@@ -89,6 +92,14 @@ export function invalidateAfterLicenseChange(): void {
 /** After a trial was started or looked up from admin: lists, counters and the audit log. */
 export function invalidateAfterTrialChange(): void {
   void queryClient.invalidateQueries({ queryKey: queryKeys.trialLists })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.auditLogs })
+}
+
+/** After a social share review or Convert to Monthly. */
+export function invalidateAfterSocialChange(): void {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.socialLists })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.licenseLists })
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboard })
   void queryClient.invalidateQueries({ queryKey: queryKeys.auditLogs })
 }

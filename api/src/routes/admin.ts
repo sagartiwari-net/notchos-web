@@ -15,6 +15,7 @@ import { registerEmailRoutes } from '../admin/email-routes.ts';
 import { registerLicenseRoutes } from '../admin/license-routes.ts';
 import { registerPublicSessionRoutes, registerSessionInfoRoute } from '../admin/session-routes.ts';
 import { registerSettingsRoutes } from '../admin/settings-routes.ts';
+import { registerSocialRoutes } from '../admin/social-routes.ts';
 import { registerTrialRoutes } from '../admin/trial-routes.ts';
 import type { AppContext } from '../context.ts';
 import { sendError } from '../http/respond.ts';
@@ -52,6 +53,7 @@ export const adminRoutes: FastifyPluginAsync<{ ctx: AppContext }> = async (app, 
     registerDashboardRoutes(secured, ctx);
     registerLicenseRoutes(secured, ctx);
     registerTrialRoutes(secured, ctx);
+    registerSocialRoutes(secured, ctx);
     registerSettingsRoutes(secured, ctx);
     registerEmailRoutes(secured, ctx);
     registerAuditRoutes(secured, ctx);

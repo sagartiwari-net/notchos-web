@@ -1,0 +1,43 @@
+---
+import { STACKS_COLUMNS, STACKS_ROWS } from '../../data/stacks-up';
+---
+
+<section class="vs-card vs-stacks">
+  <header class="vs-stacks__head">
+    <h2 class="vs-card__title">How NotchOS stacks up</h2>
+    <p class="vs-stacks__sub">Honest, feature-by-feature comparison of major macOS notch apps — no affiliates.</p>
+  </header>
+  <p class="vs-stacks__hint">Swipe the table sideways to see every app.</p>
+  <div class="vs-stacks__scroll" tabindex="0" role="region" aria-label="Feature comparison table">
+    <table class="vs-stacks__table">
+      <thead>
+        <tr>
+          <th scope="col">Feature</th>
+          {
+            STACKS_COLUMNS.map((c) => (
+              <th scope="col" class:list={{ 'is-hl': c.highlight }}>
+                {c.highlight ? `• ${c.label}` : c.label}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          STACKS_ROWS.map((row) => (
+            <tr>
+              <th scope="row">{row.feature}</th>
+              <td class="is-hl">{row.notchos}</td>
+              <td>{row.alcove}</td>
+              <td>{row.notchnook}</td>
+              <td>{row.droppy}</td>
+              <td>{row.boring}</td>
+              <td>{row.dynamiclake}</td>
+              <td>{row.mediamate}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

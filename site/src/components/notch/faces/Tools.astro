@@ -1,10 +1,8 @@
 ---
 /**
- * Tools face: search, category chips, sectioned grid of tool plates.
- * Source: Lumen/Sources/ToolsChrome.swift, HomeToolsChrome.swift (HomeToolsGrid) and
- *         ToolCatalog.swift (the catalog below is the app's list: id order, titles, tints).
+ * Tools face — current HomeToolsGrid: title+search one row, chips, dense flat catalog.
+ * Source: Lumen/Sources/HomeToolsChrome.swift + ToolCatalog.swift
  */
-import FaceHead from '../FaceHead.astro';
 import Plate from '../Plate.astro';
 import Icon from '../../Icon.astro';
 import type { IconName } from '../../../lib/icons';
@@ -15,77 +13,65 @@ interface Tool {
   tint: string;
 }
 
-const sections: Array<{ title: string; tools: Tool[] }> = [
-  {
-    title: 'Core',
-    tools: [
-      { title: 'Prompter', icon: 'prompter', tint: 'sky' },
-      { title: 'Clipboard', icon: 'clipboard', tint: 'teal' },
-      { title: 'Tasks', icon: 'checklist', tint: 'mint' },
-      { title: 'Tray', icon: 'tray-fill', tint: 'orange' },
-      { title: 'Timers', icon: 'timer', tint: 'amber' },
-      { title: 'Calendar', icon: 'calendar', tint: 'rose' },
-    ],
-  },
-  {
-    title: 'Media',
-    tools: [
-      { title: 'Now Playing', icon: 'music', tint: 'pink' },
-      { title: 'Lyrics', icon: 'lyrics', tint: 'violet' },
-      { title: 'Ambient', icon: 'waveform', tint: 'indigo' },
-    ],
-  },
-  {
-    title: 'System',
-    tools: [
-      { title: 'System', icon: 'gauge', tint: 'sky' },
-      { title: 'Keep Awake', icon: 'cup', tint: 'amber' },
-      { title: 'Mic Mute', icon: 'mic-slash', tint: 'rose' },
-      { title: 'Bluetooth', icon: 'battery', tint: 'teal' },
-      { title: 'Eject', icon: 'eject', tint: 'orange' },
-      { title: 'Clean Screen', icon: 'dashed', tint: 'mint' },
-    ],
-  },
-  {
-    title: 'Tools',
-    tools: [
-      { title: 'Strip Format', icon: 'text-x', tint: 'sky' },
-      { title: 'QR Code', icon: 'qr', tint: 'violet' },
-      { title: 'Android Share', icon: 'phone-arrow', tint: 'teal' },
-      { title: 'Window Snap', icon: 'snap', tint: 'indigo' },
-      { title: 'Timezones', icon: 'clocks', tint: 'teal' },
-      { title: 'Notes', icon: 'note', tint: 'pink' },
-      { title: 'Mirror', icon: 'camera', tint: 'violet' },
-      { title: 'Apps', icon: 'apps', tint: 'indigo' },
-    ],
-  },
+/** Flat catalog order matches ToolCatalog.all (All filter). */
+const tools: Tool[] = [
+  { title: 'Prompter', icon: 'prompter', tint: 'sky' },
+  { title: 'Clipboard', icon: 'clipboard', tint: 'teal' },
+  { title: 'Tasks', icon: 'checklist', tint: 'mint' },
+  { title: 'Tray', icon: 'tray-fill', tint: 'orange' },
+  { title: 'Timers', icon: 'timer', tint: 'amber' },
+  { title: 'Calendar', icon: 'calendar', tint: 'rose' },
+  { title: 'Now Playing', icon: 'music', tint: 'pink' },
+  { title: 'Lyrics', icon: 'lyrics', tint: 'violet' },
+  { title: 'Ambient', icon: 'waveform', tint: 'indigo' },
+  { title: 'System', icon: 'gauge', tint: 'sky' },
+  { title: 'Keep Awake', icon: 'cup', tint: 'amber' },
+  { title: 'Mic Mute', icon: 'mic-slash', tint: 'rose' },
+  { title: 'Bluetooth', icon: 'battery', tint: 'teal' },
+  { title: 'Eject', icon: 'eject', tint: 'orange' },
+  { title: 'Clean Screen', icon: 'dashed', tint: 'mint' },
+  { title: 'Strip Format', icon: 'text-x', tint: 'sky' },
+  { title: 'QR Code', icon: 'qr', tint: 'violet' },
+  { title: 'Android Share', icon: 'phone-arrow', tint: 'teal' },
+  { title: 'Window Snap', icon: 'snap', tint: 'indigo' },
+  { title: 'Timezones', icon: 'clocks', tint: 'mint' },
+  { title: 'Notes', icon: 'note', tint: 'violet' },
+  { title: 'Mirror', icon: 'camera', tint: 'violet' },
+  { title: 'Apps', icon: 'apps', tint: 'sky' },
+  { title: 'Translate', icon: 'translate', tint: 'teal' },
+  { title: 'Summarize', icon: 'doc', tint: 'sky' },
+  { title: 'Grammar', icon: 'text', tint: 'mint' },
+  { title: 'Smart Reply', icon: 'mail', tint: 'teal' },
+  { title: 'Extract', icon: 'checklist', tint: 'orange' },
+  { title: 'Rewrite', icon: 'note', tint: 'violet' },
+  { title: 'Shorter', icon: 'arrow-down', tint: 'indigo' },
+  { title: 'Longer', icon: 'arrow-up', tint: 'pink' },
+  { title: 'Generate', icon: 'sparkles', tint: 'amber' },
 ];
+
 const categories = ['All', 'Core', 'Media', 'System', 'Tools', 'AI'];
 ---
 
 <div class="tools">
-  <FaceHead icon="grid" title="Tools" tint="color-plate-sky" />
-  <div class="field">
-    <Icon name="search" size={14} weight={2.4} />
-    <span class="field__ph">Search tools</span>
+  <div class="tools__head">
+    <Plate icon="grid" size={28} tint="color-plate-sky" active />
+    <span class="tools__label">Tools</span>
+    <div class="field field--inline tools__search">
+      <Icon name="search" size={14} weight={2.4} />
+      <span class="field__ph">Search tools</span>
+    </div>
   </div>
-  <div class="chips chips--center">
-    {categories.map((category, index) => <span class:list={['chip', index === 0 && 'is-on']}>{category}</span>)}
+  <div class="chips tools__chips">
+    {categories.map((category, index) => (
+      <span class:list={['chip', 'chip--small', index === 0 && 'is-on']}>{category}</span>
+    ))}
   </div>
-  <div class="tools__sections fade-bottom">
+  <div class="tools__dense fade-bottom">
     {
-      sections.map((section) => (
-        <div class="tools__section">
-          <div class="tools__title">{section.title}</div>
-          <div class="tools__rule" />
-          <div class="tools__grid">
-            {section.tools.map((tool) => (
-              <div class="tool">
-                <Plate icon={tool.icon} tint={`color-plate-${tool.tint}`} />
-                <span class="tool__name">{tool.title}</span>
-              </div>
-            ))}
-          </div>
+      tools.map((tool) => (
+        <div class="tool">
+          <Plate icon={tool.icon} tint={`color-plate-${tool.tint}`} />
+          <span class="tool__name">{tool.title}</span>
         </div>
       ))
     }

@@ -1,11 +1,8 @@
 ---
 import Simple from '../layouts/Simple.astro';
+import { APP_VERSION, DMG_FILENAME, DMG_PATH } from '../lib/download';
 import fs from 'node:fs';
 import path from 'node:path';
-
-const version = '0.8.9';
-const dmgName = `NotchOS-${version}.dmg`;
-const dmgHref = `/downloads/${dmgName}`;
 
 /** Best-effort size for the download CTA (bytes → human). */
 function formatBytes(n: number): string {
@@ -16,10 +13,10 @@ function formatBytes(n: number): string {
 }
 
 const candidates = [
-  path.resolve(`public/downloads/${dmgName}`),
-  path.resolve(`../public/downloads/${dmgName}`),
+  path.resolve(`public/downloads/${DMG_FILENAME}`),
+  path.resolve(`../public/downloads/${DMG_FILENAME}`),
   // Local Mac artifact while building the site before server fetch-dmg.
-  path.resolve('../../Lumen/dist/' + dmgName),
+  path.resolve(`../../Lumen/dist/NotchOS-${APP_VERSION}.dmg`),
 ];
 let dmgBytes = 0;
 for (const p of candidates) {
@@ -30,7 +27,6 @@ for (const p of candidates) {
     /* try next */
   }
 }
-// Known staging size when the file isn't on disk at Astro build time.
 const dmgSizeLabel = formatBytes(dmgBytes) || '~5.1 MB';
 ---
 
@@ -40,14 +36,15 @@ const dmgSizeLabel = formatBytes(dmgBytes) || '~5.1 MB';
     Get the Mac app, then start the 7-day trial inside NotchOS — or activate with the email + key from your
     purchase.
   </p>
-  <p>
-    <a class="btn btn--primary" href={dmgHref} download={dmgName}>Download NotchOS {version} (.dmg)</a>
+  <p class="simple__actions">
+    <a class="btn btn--primary" href={DMG_PATH} download={DMG_FILENAME}>Download NotchOS {APP_VERSION} (.dmg)</a>
   </p>
   <p class="simple__note">
-    File size about <strong>{dmgSizeLabel}</strong>. Use this page’s button for a fresh download — if Chrome says
-    “Resuming…”, cancel that entry and start again so total size and time remaining show correctly.
+    File size about <strong>{dmgSizeLabel}</strong>. This link always serves the latest build — old emails and
+    bookmarks keep working when we ship a new version. If Chrome says “Resuming…”, cancel that entry and start
+    again so total size and time remaining show correctly.
   </p>
-  <p>
+  <p class="simple__actions">
     <a class="btn btn--ghost" href="/trial">Start free trial (email me the link)</a>
   </p>
   <ol class="simple__steps">
@@ -60,7 +57,7 @@ const dmgSizeLabel = formatBytes(dmgBytes) || '~5.1 MB';
   </ol>
   <p class="simple__note">
     Requires Apple silicon and macOS 26 or later. Direct file:
-    <a href={dmgHref}><code>{dmgHref}</code></a>
+    <a href={DMG_PATH}><code>{DMG_PATH}</code></a>
   </p>
-  <p><a class="btn btn--ghost" href="/#pricing">See pricing</a></p>
+  <p class="simple__actions"><a class="btn btn--ghost" href="/#pricing">See pricing</a></p>
 </Simple>

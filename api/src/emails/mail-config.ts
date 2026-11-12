@@ -65,7 +65,7 @@ export function parseMailConfig(values: EnvValues = process.env): MailConfig {
           }
         : null,
     siteUrl,
-    downloadUrl: optional(env, 'DOWNLOAD_URL') ?? `${siteUrl}/download`,
+    downloadUrl: optional(env, 'DOWNLOAD_URL') ?? `${siteUrl}/downloads/NotchOS.dmg`,
     pricingUrl: optional(env, 'PRICING_URL') ?? `${siteUrl}/#pricing`,
     supportEmail: optional(env, 'SUPPORT_EMAIL') ?? 'support@notchos.app',
     logoUrl: optional(env, 'MAIL_LOGO_URL') ?? null,

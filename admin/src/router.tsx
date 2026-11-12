@@ -13,6 +13,7 @@ import { NewLicensePage } from '@/pages/new-license-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 import { SeatMovesPage } from '@/pages/seat-moves-page'
 import { SettingsPage } from '@/pages/settings-page'
+import { SocialSubmissionsPage } from '@/pages/social-submissions-page'
 import { TrialLeadsPage } from '@/pages/trial-leads-page'
 import { TrialsPage } from '@/pages/trials-page'
 
@@ -26,6 +27,7 @@ const crumbs = {
   trials: { crumbs: () => [{ label: 'Trials' }] },
   trialLeads: { crumbs: () => [{ label: 'Trial leads' }] },
   seatMoves: { crumbs: () => [{ label: 'Seat moves' }] },
+  social: { crumbs: () => [{ label: 'Social shares' }] },
   emails: { crumbs: () => [{ label: 'Emails' }] },
   settings: { crumbs: () => [{ label: 'Settings' }] },
   audit: { crumbs: () => [{ label: 'Audit log' }] },
@@ -60,6 +62,7 @@ export const router = createBrowserRouter(
         { path: 'trials', element: <TrialsPage />, handle: crumbs.trials },
         { path: 'trial-leads', element: <TrialLeadsPage />, handle: crumbs.trialLeads },
         { path: 'seat-moves', element: <SeatMovesPage />, handle: crumbs.seatMoves },
+        { path: 'social', element: <SocialSubmissionsPage />, handle: crumbs.social },
         { path: 'emails', element: <EmailsPage />, handle: crumbs.emails },
         { path: 'settings', element: <SettingsPage />, handle: crumbs.settings },
         { path: 'audit', element: <AuditLogPage />, handle: crumbs.audit },

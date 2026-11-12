@@ -1,8 +1,7 @@
 ---
 /**
- * Clipboard face: history, snippets, search.
- * Source: Lumen/Sources/ClipChrome.swift (ClipboardFace, toolbar, ScrapRow).
- * The clippings are sample data written for this page.
+ * Clipboard face — matched to current Lumen ClipChrome.swift:
+ * Strip / QR / Summarize / Reply header chips; History + Snippets + search on one row.
  */
 import FaceHead from '../FaceHead.astro';
 import Icon from '../../Icon.astro';
@@ -21,23 +20,26 @@ const rows: Array<{ icon: IconName; title: string; meta: string; pinned?: boolea
   <FaceHead icon="clipboard" title="Clipboard" tint="color-plate-teal">
     <span class="chip chip--primary">Strip</span>
     <span class="chip chip--secondary">QR</span>
-    <span class="chip chip--secondary">AI</span>
+    <span class="chip chip--secondary">Summarize</span>
+    <span class="chip chip--secondary">Reply</span>
   </FaceHead>
+
   <div class="clip__bar">
     <span class="chip is-on">History</span>
     <span class="chip">Snippets</span>
-    <span class="clip__gap"></span>
+    <div class="field field--inline clip__search">
+      <Icon name="search" size={14} weight={2.4} />
+      <span class="field__ph">Search</span>
+    </div>
     <span class="chip chip--secondary">Pause</span>
     <span class="chip chip--secondary">Clear</span>
-    <span class="roundbtn"><Icon name="plus" size={13} weight={2.6} /></span>
+    <span class="roundbtn" title="New snippet"><Icon name="plus" size={13} weight={2.6} /></span>
   </div>
-  <div class="field">
-    <Icon name="search" size={14} weight={2.4} />
-    <span class="field__ph">Search clipboard</span>
-  </div>
+
   <div class="chips">
     <span class="chip chip--small">Copy only</span>
   </div>
+
   <div class="rows fade-bottom">
     {
       rows.map((row) => (

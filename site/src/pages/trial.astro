@@ -28,7 +28,7 @@ import Simple from '../layouts/Simple.astro';
     <button class="btn btn--primary" type="submit" id="trial-submit">Email me the download link</button>
     <p class="simple__status" id="trial-status" role="status" aria-live="polite"></p>
     <p id="trial-download-wrap" hidden>
-      <a class="btn btn--primary" id="trial-download" href="/downloads/NotchOS-0.8.9.dmg">Download NotchOS now</a>
+      <a class="btn btn--primary" id="trial-download" href="/downloads/NotchOS.dmg">Download NotchOS now</a>
     </p>
   </form>
 
@@ -43,7 +43,7 @@ import Simple from '../layouts/Simple.astro';
     Temporary / disposable inboxes are blocked. Requires Apple silicon and macOS 26 or later.
     Already have a key? <a href="/download">Download</a> or <a href="/recover">Recover key</a>.
   </p>
-  <p>
+  <p class="simple__actions">
     <a class="btn btn--ghost" href="/download">Download without email</a>
     <a class="btn btn--ghost" href="/#pricing">See pricing</a>
   </p>

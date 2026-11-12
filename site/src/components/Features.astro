@@ -1,28 +1,56 @@
 ---
 /**
- * Feature grid. The Mac app is full-lock until trial or paid; marks still show what Pro adds.
+ * Feature grid — matches the shipped Mac app (Tools / Kit / AI / Share).
  */
 const groups = [
   {
     title: 'Everyday',
     items: [
+      { name: 'Home', blurb: 'Today at a glance — music, weather, and what’s next.', mark: 'Core' },
       { name: 'Tray', blurb: 'Drop files into the notch, then AirDrop, move, or clear.', mark: 'Core' },
       { name: 'Clipboard', blurb: 'History of what you copied, ready to paste again.', mark: 'Core' },
       { name: 'Calendar', blurb: 'Today and the week under the camera.', mark: 'Core' },
       { name: 'Tasks', blurb: 'Quick list without leaving the lip.', mark: 'Core' },
       { name: 'Timers', blurb: 'Countdown that peeks when the notch is closed.', mark: 'Core' },
       { name: 'Prompter', blurb: 'Scroll your script under the notch while you talk.', mark: 'Core' },
+      { name: 'System', blurb: 'CPU, memory, disks, and battery in one glance.', mark: 'Core' },
     ],
   },
   {
-    title: 'Pro tools',
+    title: 'Share & convert',
     items: [
-      { name: 'Writing Tools', blurb: 'On-device rewrite and polish — no cloud credits.', mark: 'Pro' },
-      { name: 'Window Snap', blurb: 'Park the front window without leaving the island.', mark: 'Pro' },
-      { name: 'Clean Screen', blurb: 'Dim and lock the display for presenting.', mark: 'Pro' },
+      { name: 'Android Share', blurb: 'Send files to your phone with Nearby / QR — from the notch.', mark: 'Pro' },
+      { name: 'Translate', blurb: 'Paste text, pick languages, copy the result side by side.', mark: 'Pro' },
+      { name: 'Strip Format', blurb: 'Paste rich text on the left, plain result on the right.', mark: 'Pro' },
+      { name: 'QR Code', blurb: 'Turn a link or note into a scannable code.', mark: 'Pro' },
+    ],
+  },
+  {
+    title: 'Kit utilities',
+    items: [
+      { name: 'Notes', blurb: 'Pinned notes beside a fixed editor — list scrolls, buttons stay.', mark: 'Pro' },
+      { name: 'Mirror', blurb: 'Webcam preview under the notch for lighting checks.', mark: 'Pro' },
+      { name: 'Apps', blurb: 'Pin Mac apps and run Shortcuts without leaving the island.', mark: 'Pro' },
+    ],
+  },
+  {
+    title: 'AI & focus',
+    items: [
+      { name: 'AI studio', blurb: 'Summarize, rewrite, grammar, replies — on-device tiles.', mark: 'Pro' },
       { name: 'Ambient', blurb: 'Focus loops that stay out of Now Playing.', mark: 'Pro' },
       { name: 'Lyrics', blurb: 'Live lines from Music while you work.', mark: 'Pro' },
+      { name: 'Window Snap', blurb: 'Park the front window without leaving the island.', mark: 'Pro' },
+      { name: 'Clean Screen', blurb: 'Dim and lock the display for presenting.', mark: 'Pro' },
+      { name: 'Keep Awake', blurb: 'Stop sleep while you present or transfer.', mark: 'Pro' },
+    ],
+  },
+  {
+    title: 'Hardware helpers',
+    items: [
       { name: 'Bluetooth glance', blurb: 'Battery for nearby headphones and mice.', mark: 'Pro' },
+      { name: 'Eject', blurb: 'Unmount volumes from the notch.', mark: 'Pro' },
+      { name: 'Mic Mute', blurb: 'Mute the input with one tap.', mark: 'Pro' },
+      { name: 'Timezones', blurb: 'World clocks you actually use.', mark: 'Pro' },
     ],
   },
 ];
@@ -31,10 +59,12 @@ const groups = [
 <section class="section wrap" id="features" aria-labelledby="features-title">
   <header class="section__head">
     <p class="section__eyebrow">Everything in NotchOS</p>
-    <h2 class="section__title" id="features-title">One island. The tools you actually open.</h2>
+    <h2 class="section__title" id="features-title">Mac notch tools in one Dynamic Island</h2>
     <p class="section__lead">
-      Until you start a trial or activate a key, the Mac app stays locked. After that, Core faces and Pro tools
-      unlock with your plan.
+      Download free, start a 7-day trial in the app, then keep Pro with Monthly or Lifetime. Core faces
+      and Pro tools unlock with your plan — no invented reviews, just what ships. Guides:
+      <a href="/blog">blog</a>, <a href="/best-mac-notch-apps">best notch apps</a>,
+      <a href="/alternatives">alternatives</a>.
     </p>
   </header>
 

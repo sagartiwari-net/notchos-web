@@ -197,14 +197,14 @@ export function buildSeed(now: number): MockDb {
   }
 
   // Placeholders so the pages have numbers to show. The real prices are the owner's decision.
-  const monthlyPrice = '4.99'
-  const lifetimePrice = '29.99'
+  const monthlyPrice = '3.00'
+  const lifetimePrice = '15.00'
   const settings: Settings = {
     prices: { monthly: monthlyPrice, lifetime: lifetimePrice },
     trial_days: 7,
     transfer_limit: 2,
     renewal_buffer_hours: 24,
-    download_url: 'https://example.com/download/NotchOS-0.7.0.dmg',
+    download_url: 'https://example.com/downloads/NotchOS.dmg',
     app_version: '0.7.0',
     paypal_plan_id: null,
     mail: {

@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import Content from '../../layouts/Content.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('compare');
+  return pages
+    .filter((p) => !p.data.draft)
+    .map((page) => ({
+      params: { slug: page.id },
+      props: { page },
+    }));
+}
+
+const { page } = Astro.props;
+const { Content: Body } = await render(page);
+---
+
+<Content
+  title={`${page.data.title} — NotchOS`}
+  description={page.data.description}
+  path={`/compare/${page.id}`}
+  eyebrow="Compare"
+>
+  <h1>{page.data.title}</h1>
+  <Body />
+</Content>

@@ -1,0 +1,38 @@
+---
+import Content from '../../layouts/Content.astro';
+import VsArticle from '../../components/vs/VsArticle.astro';
+import { VS_APPS, getVsApp } from '../../data/vs-apps';
+import { getVsTierA } from '../../data/vs-tier-a';
+
+export function getStaticPaths() {
+  return VS_APPS.map((app) => ({
+    params: { slug: app.slug },
+    props: { slug: app.slug },
+  }));
+}
+
+const { slug } = Astro.props;
+const app = getVsApp(slug);
+if (!app) {
+  throw new Error(`Missing vs app: ${slug}`);
+}
+const tier = getVsTierA(app.slug);
+const title =
+  tier?.title ?? `NotchOS vs ${app.name} — Mac comparison (2026)`;
+const description =
+  tier?.description ??
+  `${app.name} alternative for Mac: NotchOS vs ${app.name} — ${app.overlap}. $15 lifetime or $3/mo, 7-day trial. First-party page; NotchOS is ours. Verify ${app.name} pricing on the vendor site.`;
+---
+
+<Content
+  title={title}
+  description={description}
+  path={`/vs/${app.slug}`}
+  eyebrow={app.name}
+  buyBar
+  wide
+  competitor={app.name}
+  hubCurrent={app.slug}
+>
+  <VsArticle app={app} />
+</Content>

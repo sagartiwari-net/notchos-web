@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import VsHub from '../../components/vs/VsHub.astro';
+
+const pages = (await getCollection('alternatives'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => a.data.competitor.localeCompare(b.data.competitor));
+---
+
+<Base
+  title="Mac notch app alternatives — compared with NotchOS"
+  description="Honest alternatives pages for Boring Notch, Alcove, NotchNook, Notchy, NotchBox, DynamicLake and more — with fair tables and where NotchOS fits."
+  path="/alternatives"
+>
+  <Nav />
+  <main id="main" class="wrap content content--compare">
+    <h1 class="content__h1">Alternatives</h1>
+    <p class="content__lead">
+      Looking up a specific Mac notch app? Each page covers what it is, price, macOS floor, strengths, and how
+      NotchOS compares. Official competitor links are included. NotchOS is our product — we say so on every page.
+    </p>
+    <ul class="postlist">
+      {
+        pages.map((page) => (
+          <li class="postlist__item">
+            <a class="postlist__link" href={`/alternatives/${page.id}`}>
+              <span class="postlist__title">{page.data.competitor}</span>
+              <span class="postlist__desc">{page.data.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="content__more">
+      Roundup: <a href="/best-mac-notch-apps">Best Mac notch apps</a>. Full pill hub (detailed vs every app):
+      <a href="/vs">Compare NotchOS vs Mac apps</a> — notch, clipboard, calendars, launchers, OCR, HUDs, and more.
+      Long-form posts: <a href="/compare">Compare</a>. Guides: <a href="/blog">Blog</a>.
+    </p>
+  </main>
+  <VsHub />
+  <Footer />
+</Base>

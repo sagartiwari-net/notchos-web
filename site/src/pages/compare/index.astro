@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import VsHub from '../../components/vs/VsHub.astro';
+
+const pages = (await getCollection('compare'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Base
+  title="Mac notch app comparisons — NotchOS"
+  description="Head-to-head comparisons of Mac notch and Dynamic Island apps, including where NotchOS fits."
+  path="/compare"
+>
+  <Nav />
+  <main id="main" class="wrap content content--compare">
+    <h1 class="content__h1">Compare</h1>
+    <p class="content__lead">
+      Multi-app long-form posts with price, macOS minimum, and feature tables. For the full pill-style hub (every single
+      app), open <a href="/vs">Compare NotchOS vs Mac apps</a>. NotchOS is disclosed as our product.
+    </p>
+    <ul class="postlist">
+      {
+        pages.map((page) => (
+          <li class="postlist__item">
+            <a class="postlist__link" href={`/compare/${page.id}`}>
+              <span class="postlist__title">{page.data.title}</span>
+              <span class="postlist__desc">{page.data.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+  <VsHub />
+  <Footer />
+</Base>

@@ -1,0 +1,707 @@
+---
+/**
+ * Share for a discount: up to 20% off Lifetime, 5% for each network a post went up on.
+ *
+ * Two columns on a wide window. Left: the offer and a meter that counts the discount as the
+ * links go in (it stays in view while the form scrolls). Right: three numbered steps — post,
+ * paste the links, take the coupon. One column on a narrow window.
+ *
+ * The meter counts what the server will count (api/src/services/social-share.ts): a link has
+ * to be from that network's own domain, and Instagram needs the post and the profile. Keep the
+ * host patterns in the script below in step with ALLOWED_HOSTS there.
+ *
+ * Every class here is under `deal__`. The notch demo's styles are global (faces.css has its
+ * own .field, .share, .tile …), and a bare name on this page would pick them up.
+ */
+import Simple from '../layouts/Simple.astro';
+
+const networks = [
+  { id: 'linkedin', name: 'LinkedIn' },
+  { id: 'facebook', name: 'Facebook' },
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'x', name: 'X' },
+];
+---
+
+<Simple
+  title="Get up to 20% off Lifetime — NotchOS"
+  description="Share NotchOS on LinkedIn, Facebook, Instagram, or X for a one-time Lifetime coupon. Max 20%. Does not apply to Monthly."
+  wide
+>
+  <div class="deal">
+    <header class="deal__intro">
+      <p class="deal__tag">Lifetime only</p>
+      <h1 class="deal__title">Get up to 20% extra off</h1>
+      <p class="deal__lead">
+        Share NotchOS on social, paste your links and email, and we issue a <strong>one-time coupon</strong>.
+        At checkout it binds to your <strong>PayPal email</strong>. This offer does <strong>not</strong> apply to
+        Monthly ($3).
+      </p>
+
+      <section class="deal__meter" aria-labelledby="meter-title">
+        <div class="deal__meter-top">
+          <h2 class="deal__meter-title" id="meter-title">Your discount</h2>
+          <p class="deal__total" aria-live="polite">
+            <strong data-meter-percent>0%</strong>
+            <span>of 20%</span>
+          </p>
+        </div>
+        <div class="deal__bar" aria-hidden="true"><i data-meter-fill></i></div>
+        <p class="deal__price" data-meter-price>Lifetime $15</p>
+        <ul class="deal__nets">
+          {
+            networks.map((network) => (
+              <li class="deal__net" data-net={network.id} data-state="empty">
+                <span class="deal__net-name">{network.name}</span>
+                <span class="deal__net-gain" data-net-gain>
+                  +5%
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="deal__meter-note">5% for each network you post on. Four networks, 20% at most.</p>
+      </section>
+    </header>
+
+    <div class="deal__steps">
+      <section class="deal__step discount-share" aria-labelledby="step-post">
+        <h2 class="deal__step-title" id="step-post">
+          <span class="deal__step-n" aria-hidden="true">1</span>Post about NotchOS
+        </h2>
+        <p class="deal__step-lead">Copy this message and post it on LinkedIn, Facebook, Instagram and/or X.</p>
+        <textarea id="share-text" class="deal__post" readonly rows="4" aria-label="Suggested post"
+        >I’ve been using NotchOS on my Mac — tools right in the notch (clipboard, share to Android, translate, AI). Check it out: https://notch.sagartiwari.net/</textarea>
+        <div class="deal__row">
+          <button type="button" class="btn btn--ghost btn--small" id="copy-share">Copy message</button>
+          <p class="deal__hint">Instagram: paste the same text with a screenshot of the notch.</p>
+        </div>
+      </section>
+
+      <form class="deal__step" id="discount-form" aria-labelledby="step-links">
+        <h2 class="deal__step-title" id="step-links">
+          <span class="deal__step-n" aria-hidden="true">2</span>Paste your links
+        </h2>
+        <p class="deal__step-lead">One link per network is enough. Leave the ones you skipped empty.</p>
+
+        <label class="deal__field">
+          <span>Your email</span>
+          <input type="email" name="email" required maxlength="254" autocomplete="email" placeholder="you@example.com" />
+        </label>
+        <p class="deal__field-note">
+          We save this with your links for review. Your license key still goes only to your PayPal email when you
+          buy.
+        </p>
+
+        <div class="deal__fields">
+          <label class="deal__field" data-field="linkedin">
+            <span>LinkedIn post URL</span>
+            <input type="url" name="linkedin_url" maxlength="512" placeholder="https://www.linkedin.com/..." />
+          </label>
+          <label class="deal__field" data-field="facebook">
+            <span>Facebook post URL</span>
+            <input type="url" name="facebook_url" maxlength="512" placeholder="https://www.facebook.com/..." />
+          </label>
+          <label class="deal__field" data-field="instagram">
+            <span>Instagram post URL</span>
+            <input type="url" name="instagram_url" maxlength="512" placeholder="https://www.instagram.com/p/..." />
+          </label>
+          <label class="deal__field" data-field="instagram">
+            <span>Instagram profile URL</span>
+            <input type="url" name="instagram_profile_url" maxlength="512" placeholder="https://www.instagram.com/you/" />
+          </label>
+          <label class="deal__field deal__field--wide" data-field="x">
+            <span>X (Twitter) post URL</span>
+            <input type="url" name="x_url" maxlength="512" placeholder="https://x.com/..." />
+          </label>
+        </div>
+
+        <!-- honeypot -->
+        <input type="text" name="company" class="discount-form__hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+        <div class="deal__submit">
+          <button type="submit" class="btn btn--primary" id="discount-submit">Get my coupon</button>
+          <p class="deal__sum" data-meter-sum>Add at least one post link.</p>
+          <p class="discount-form__status" id="discount-status" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+
+      <aside class="deal__step deal__step--result discount-result" id="discount-result" aria-labelledby="step-coupon" hidden>
+        <h2 class="deal__step-title" id="step-coupon">
+          <span class="deal__step-n" aria-hidden="true">3</span>Your coupon
+        </h2>
+        <div class="deal__coupon">
+          <p class="deal__code" id="discount-code"></p>
+          <button type="button" class="btn btn--ghost btn--small" id="copy-coupon">Copy code</button>
+        </div>
+        <p class="deal__detail" id="discount-detail"></p>
+        <div class="deal__row">
+          <a class="btn btn--primary" href="/#pricing">Use it on Lifetime</a>
+          <p class="deal__hint">One-time code. It binds to your PayPal email when you pay.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Simple>
+
+<style>
+  /* ---- the two columns */
+  .deal {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 28px clamp(28px, 5vw, 64px);
+    align-items: start;
+  }
+  /* Stays in view beside the form, when the window is tall enough to show all of it. */
+  @media (min-width: 901px) and (min-height: 700px) {
+    .deal__intro {
+      position: sticky;
+      top: 84px; /* under the nav, which is 60px tall */
+    }
+  }
+  @media (max-width: 900px) {
+    .deal {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ---- the offer */
+  .deal__tag {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    margin: 0 0 14px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--cmp-accent-soft);
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    color: var(--cmp-accent-text);
+  }
+  .deal__title {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 4.4vw, 44px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .deal__lead {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--cmp-ink-2);
+    text-wrap: pretty;
+  }
+
+  /* ---- the meter: what the links entered so far are worth */
+  .deal__meter {
+    margin-top: 24px;
+    padding: 18px;
+    border: 1px solid var(--cmp-border);
+    border-radius: 18px;
+    background: var(--cmp-panel);
+    box-shadow: var(--cmp-shadow-lift);
+  }
+  .deal__meter-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .deal__meter-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--cmp-ink-2);
+  }
+  .deal__total {
+    margin: 0;
+    font-size: 13px;
+    color: var(--cmp-ink-3);
+    white-space: nowrap;
+  }
+  .deal__total strong {
+    margin-right: 4px;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--cmp-ink-1);
+  }
+  .deal__bar {
+    height: 8px;
+    margin: 12px 0 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--cmp-track);
+  }
+  /* --p is the discount so far, 0 to 20 */
+  .deal__bar > i {
+    display: block;
+    width: calc(var(--p, 0) * 5%);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--cmp-accent-ink);
+    transition: width 0.2s ease-out;
+  }
+  .deal__price {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: var(--cmp-ink-2);
+  }
+  /* the script writes the struck list price and the new one into this line */
+  .deal__price :global(s) {
+    color: var(--cmp-ink-3);
+  }
+  .deal__price :global(strong) {
+    color: var(--cmp-ink-1);
+  }
+  .deal__nets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .deal__net {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px 8px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--cmp-border);
+    border-radius: 12px;
+    background: var(--cmp-bg);
+    font-size: 13.5px;
+    transition: background-color 0.16s ease-out, border-color 0.16s ease-out;
+  }
+  .deal__net-name {
+    font-weight: 650;
+    color: var(--cmp-ink-1);
+  }
+  .deal__net-gain {
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+    color: var(--cmp-ink-3);
+  }
+  /* counted */
+  .deal__net[data-state='ok'] {
+    border-color: #a9d9b6;
+    background: #effaf2;
+  }
+  .deal__net[data-state='ok'] .deal__net-gain {
+    color: var(--cmp-good);
+  }
+  /* a link is there but will not count yet */
+  .deal__net[data-state='bad'],
+  .deal__net[data-state='half'] {
+    border-color: #efc4be;
+    background: #fdf3f1;
+  }
+  .deal__net[data-state='bad'] .deal__net-gain,
+  .deal__net[data-state='half'] .deal__net-gain {
+    color: var(--cmp-bad);
+  }
+  .deal__meter-note {
+    margin: 12px 0 0;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--cmp-ink-3);
+  }
+
+  /* ---- the steps */
+  .deal__steps {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+  .deal__step {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--cmp-border);
+    border-radius: 18px;
+    background: var(--cmp-panel);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+  }
+  .deal__step-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .deal__step-n {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--cmp-accent-soft);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cmp-accent-text);
+  }
+  .deal__step-lead {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--cmp-ink-2);
+  }
+  .deal__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 12px;
+  }
+  .deal__hint {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--cmp-ink-3);
+  }
+
+  .deal__post {
+    display: block;
+    width: 100%;
+    min-height: 96px;
+    padding: 12px;
+    border: 1px solid var(--cmp-border-strong);
+    border-radius: 12px;
+    background: var(--cmp-bg);
+    font: inherit;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--cmp-ink-1);
+    resize: vertical;
+  }
+
+  .deal__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 12px;
+  }
+  .deal__field {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-width: 0;
+  }
+  .deal__field--wide {
+    grid-column: 1 / -1;
+  }
+  .deal__field > span {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--cmp-ink-2);
+  }
+  .deal__field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cmp-border-strong);
+    border-radius: 10px;
+    background: var(--cmp-panel);
+    font: inherit;
+    font-size: 14.5px;
+    color: var(--cmp-ink-1);
+  }
+  .deal__field input:focus-visible,
+  .deal__post:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  /* the same verdict as the network's tile in the meter */
+  .deal__field[data-state='ok'] input {
+    border-color: #6dbd85;
+  }
+  .deal__field[data-state='bad'] input {
+    border-color: var(--cmp-bad);
+  }
+  .deal__field-note {
+    margin: 8px 0 16px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--cmp-ink-3);
+  }
+  @media (max-width: 560px) {
+    .deal__fields {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .discount-form__hp {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    height: 0;
+    width: 0;
+  }
+  .deal__submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--cmp-border);
+  }
+  .deal__sum {
+    margin: 0;
+    font-size: 14px;
+    color: var(--cmp-ink-2);
+  }
+  .discount-form__status {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--cmp-ink-2);
+  }
+  .discount-form__status:empty {
+    display: none;
+  }
+  .discount-form__status[data-kind='ok'] {
+    color: var(--cmp-good);
+  }
+  .discount-form__status[data-kind='error'] {
+    color: var(--cmp-bad);
+  }
+
+  /* ---- the coupon */
+  .deal__step--result {
+    border-color: #a9d9b6;
+    background: #effaf2;
+  }
+  .deal__step--result .deal__step-n {
+    background: #cdecd7;
+    color: var(--cmp-good);
+  }
+  .deal__coupon {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin: 12px 0 10px;
+  }
+  .deal__code {
+    min-width: 0;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px dashed #6dbd85;
+    border-radius: 12px;
+    background: var(--cmp-panel);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--cmp-ink-1);
+    overflow-wrap: anywhere;
+  }
+  .deal__detail {
+    margin: 0 0 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--cmp-ink-2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deal__bar > i,
+    .deal__net {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const LIST_PRICE = 15; // Lifetime, USD: the same figure the API quotes the coupon against
+  const STEP = 5; // percent for each network
+  const MAX = 20;
+
+  // A link counts when it is from the network's own domain. Same patterns as ALLOWED_HOSTS in
+  // api/src/services/social-share.ts — the server has the last word, this only says it early.
+  const HOSTS: Record<string, RegExp> = {
+    linkedin: /(^|\.)linkedin\.com$/i,
+    facebook: /(^|\.)(facebook\.com|fb\.watch|fb\.com)$/i,
+    instagram: /(^|\.)instagram\.com$/i,
+    x: /(^|\.)(x\.com|twitter\.com)$/i,
+  };
+  // The inputs each network needs. Instagram needs both: the post and the profile.
+  const NEEDS: Record<string, string[]> = {
+    linkedin: ['linkedin_url'],
+    facebook: ['facebook_url'],
+    instagram: ['instagram_url', 'instagram_profile_url'],
+    x: ['x_url'],
+  };
+
+  const form = document.getElementById('discount-form') as HTMLFormElement | null;
+  const statusEl = document.getElementById('discount-status');
+  const result = document.getElementById('discount-result');
+  const codeEl = document.getElementById('discount-code');
+  const detailEl = document.getElementById('discount-detail');
+  const shareText = document.getElementById('share-text') as HTMLTextAreaElement | null;
+  const percentEl = document.querySelector<HTMLElement>('[data-meter-percent]');
+  const fillEl = document.querySelector<HTMLElement>('[data-meter-fill]');
+  const priceEl = document.querySelector<HTMLElement>('[data-meter-price]');
+  const sumEl = document.querySelector<HTMLElement>('[data-meter-sum]');
+
+  const money = (n: number) => `$${n % 1 === 0 ? n : n.toFixed(2)}`;
+  const after = (percent: number) => Math.round(LIST_PRICE * (1 - percent / 100) * 100) / 100;
+
+  function setStatus(text: string, kind: 'ok' | 'error' | 'pending' = 'pending') {
+    if (!statusEl) return;
+    statusEl.textContent = text;
+    statusEl.dataset.kind = kind;
+  }
+
+  /** 'empty' | 'ok' | 'bad' for one input, judged the way the server will judge it. */
+  function verdict(name: string, network: string): 'empty' | 'ok' | 'bad' {
+    const input = form?.elements.namedItem(name);
+    const raw = input instanceof HTMLInputElement ? input.value.trim() : '';
+    if (raw === '') return 'empty';
+    try {
+      const url = new URL(raw);
+      const web = url.protocol === 'https:' || url.protocol === 'http:';
+      const own = HOSTS[network];
+      return web && own !== undefined && own.test(url.hostname) ? 'ok' : 'bad';
+    } catch {
+      return 'bad';
+    }
+  }
+
+  /** Reads the form and brings the meter, the tiles and the fields in line with it. */
+  function count() {
+    let networks = 0;
+    for (const [network, names] of Object.entries(NEEDS)) {
+      const verdicts = names.map((name) => verdict(name, network));
+      let state: 'empty' | 'ok' | 'bad' | 'half' = 'empty';
+      if (verdicts.includes('bad')) state = 'bad';
+      else if (verdicts.every((v) => v === 'ok')) state = 'ok';
+      else if (verdicts.includes('ok')) state = 'half';
+      if (state === 'ok') networks++;
+
+      const tile = document.querySelector<HTMLElement>(`[data-net="${network}"]`);
+      if (tile) {
+        tile.dataset.state = state;
+        const gain = tile.querySelector('[data-net-gain]');
+        if (gain) {
+          gain.textContent =
+            state === 'ok' ? `+${STEP}% added` : state === 'bad' ? 'Check the link' : state === 'half' ? 'Needs both links' : `+${STEP}%`;
+        }
+      }
+      names.forEach((name, i) => {
+        const input = form?.elements.namedItem(name);
+        const field = input instanceof HTMLInputElement ? input.closest<HTMLElement>('.deal__field') : null;
+        if (field) field.dataset.state = verdicts[i] ?? 'empty';
+      });
+    }
+
+    const percent = Math.min(MAX, networks * STEP);
+    if (percentEl) percentEl.textContent = `${percent}%`;
+    if (fillEl) fillEl.style.setProperty('--p', String(percent));
+    if (priceEl) {
+      priceEl.innerHTML =
+        percent === 0
+          ? `Lifetime ${money(LIST_PRICE)}`
+          : `Lifetime <s>${money(LIST_PRICE)}</s> <strong>${money(after(percent))}</strong>`;
+    }
+    if (sumEl) {
+      sumEl.textContent =
+        percent === 0 ? 'Add at least one post link.' : `You get ${percent}% off — Lifetime for ${money(after(percent))}.`;
+    }
+    return percent;
+  }
+
+  /** Says "Copied" on the button for a moment, then puts its label back. */
+  function flash(button: HTMLElement | null, text: string) {
+    if (!button) return;
+    const label = button.dataset.label ?? button.textContent ?? '';
+    button.dataset.label = label;
+    button.textContent = text;
+    window.setTimeout(() => {
+      button.textContent = label;
+    }, 1600);
+  }
+
+  form?.addEventListener('input', count);
+  count();
+
+  document.getElementById('copy-share')?.addEventListener('click', async (event) => {
+    if (!shareText) return;
+    const button = event.currentTarget as HTMLElement;
+    try {
+      await navigator.clipboard.writeText(shareText.value);
+      flash(button, 'Copied');
+    } catch {
+      shareText.select();
+      setStatus('Select the message and copy it by hand.', 'error');
+    }
+  });
+
+  document.getElementById('copy-coupon')?.addEventListener('click', async (event) => {
+    const code = codeEl?.textContent?.trim();
+    if (!code) return;
+    const button = event.currentTarget as HTMLElement;
+    try {
+      await navigator.clipboard.writeText(code);
+      flash(button, 'Copied');
+    } catch {
+      setStatus('Copy the code by hand.', 'error');
+    }
+  });
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!form) return;
+    setStatus('Submitting…');
+    const data = new FormData(form);
+    const body: Record<string, string> = { email: String(data.get('email') || '') };
+    for (const key of [
+      'linkedin_url',
+      'facebook_url',
+      'instagram_url',
+      'instagram_profile_url',
+      'x_url',
+      'company',
+    ] as const) {
+      const v = String(data.get(key) || '').trim();
+      if (v) body[key] = v;
+    }
+
+    try {
+      const res = await fetch('/api/discount/submit', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus(json?.message || 'Could not create a coupon. Check your links and try again.', 'error');
+        return;
+      }
+      if (!json?.coupon_code) {
+        setStatus(json?.message || 'Could not create a coupon.', 'error');
+        return;
+      }
+      if (codeEl) codeEl.textContent = json.coupon_code || '';
+      if (detailEl) {
+        const price = json.amount_after ? ` — ${money(Number(json.amount_after))} instead of ${money(LIST_PRICE)}` : '';
+        detailEl.textContent = `${json.percent}% off Lifetime${price} (${json.networks} network${json.networks === 1 ? '' : 's'}). One-time use.`;
+      }
+      result?.removeAttribute('hidden');
+      setStatus('Coupon ready — copy it before you leave this page.', 'ok');
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      result?.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' });
+    } catch {
+      setStatus('Network error. Try again.', 'error');
+    }
+  });
+</script>

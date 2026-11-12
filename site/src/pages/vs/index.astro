@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import VsBuyBar from '../../components/vs/VsBuyBar.astro';
+import { VS_APPS, VS_CATEGORIES } from '../../data/vs-apps';
+
+const total = VS_APPS.length;
+---
+
+<Base
+  title={`Compare NotchOS vs ${total} Mac Apps — Detailed Guides`}
+  description={`Detailed NotchOS vs comparisons across ${total} Mac utilities: Dynamic Island / notch apps, clipboard, calendars, focus tools, shelves, windows, AI, and more. Internally linked hub — we disclose NotchOS is ours.`}
+  path="/vs"
+>
+  <Nav />
+  <main id="main" class="wrap vs-hub content--compare">
+    <VsBuyBar />
+    <p class="content__eyebrow"><a href="/blog">Guides</a> · Compare</p>
+    <h1 class="content__h1">Compare NotchOS vs {total} Mac apps</h1>
+    <p class="content__lead">
+      Every app below links to a detailed NotchOS vs page — why bullets, fact table, FAQ, and the same hub at the
+      foot so every comparison links to every other. <strong>NotchOS is our product</strong>; we disclose that.
+      Competitor prices and OS floors are approximate — verify on each vendor site.
+    </p>
+    <p class="vs-hub__jump">
+      Also: <a href="/alternatives">alternatives</a> ·
+      <a href="/best-mac-notch-apps">best Mac notch apps</a> ·
+      <a href="/compare">long-form multi-app posts</a> ·
+      <a href="/blog">blog</a> ·
+      <a href="/trial">7-day trial</a>
+    </p>
+
+    {
+      VS_CATEGORIES.map((cat) => {
+        const apps = VS_APPS.filter((a) => a.category === cat.id);
+        if (!apps.length) return null;
+        return (
+          <section class="vs-cat" id={cat.id}>
+            <header class="vs-cat__head">
+              <h2 class="vs-cat__title">{cat.title}</h2>
+              <p class="vs-cat__count">{apps.length} apps</p>
+            </header>
+            <p class="vs-cat__intro">{cat.intro}</p>
+            <div class="vs-pills">
+              {apps.map((app) => (
+                <a class="vs-pill" href={`/vs/${app.slug}`}>
+                  vs {app.name}
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+      })
+    }
+
+    <section class="vs-cat vs-cat--foot">
+      <h2 class="vs-cat__title">Start with NotchOS</h2>
+      <p class="vs-cat__intro">
+        Apple silicon · macOS 26+ · 7-day trial, no card · Lifetime $15 · Monthly $3. Key emailed to your PayPal address.
+      </p>
+      <div class="vs-buy__actions">
+        <a class="vs-btn vs-btn--primary" href="/trial">Try Free for 7 Days</a>
+        <a class="vs-btn vs-btn--secondary" href="/#pricing">Buy NotchOS $15</a>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>

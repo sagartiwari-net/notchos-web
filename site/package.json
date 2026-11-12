@@ -13,10 +13,12 @@
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
     "shots": "node scripts/shots.mjs",
+    "audit": "node scripts/audit.mjs",
     "fps": "node scripts/fps.mjs",
     "look": "node scripts/look.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.4.8",
     "gsap": "^3.15.1"
   },

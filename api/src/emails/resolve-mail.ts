@@ -26,7 +26,7 @@ function envMailFallback(): MailConfig {
       from: process.env.MAIL_FROM?.trim() || 'NotchOS <noreply@notchos.app>',
       smtp: null,
       siteUrl,
-      downloadUrl: process.env.DOWNLOAD_URL?.trim() || `${siteUrl}/download`,
+      downloadUrl: process.env.DOWNLOAD_URL?.trim() || `${siteUrl}/downloads/NotchOS.dmg`,
       pricingUrl: process.env.PRICING_URL?.trim() || `${siteUrl}/#pricing`,
       supportEmail: process.env.SUPPORT_EMAIL?.trim() || 'support@notchos.app',
       logoUrl: process.env.MAIL_LOGO_URL?.trim() || null,

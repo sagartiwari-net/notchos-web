@@ -54,6 +54,8 @@ import type {
   CreateTrialInput,
   EmailLogItem,
   SeatMove,
+  SocialSubmission,
+  SocialSubmissionListParams,
   TrialLead,
   TrialListItem,
   TrialListParams,
@@ -354,6 +356,41 @@ export function listSeatMoves(params: { q?: string; page?: number; page_size?: n
   return request<Page<SeatMove>>('GET', '/seat-moves', {
     query: { q: params.q, page: params.page, page_size: params.page_size },
   })
+}
+
+/**
+ * GET /api/social-submissions?q=&status=&page=&page_size=
+ * Share-for-discount claims. Newest first.
+ */
+export function listSocialSubmissions(
+  params: SocialSubmissionListParams = {},
+): Promise<Page<SocialSubmission>> {
+  return request<Page<SocialSubmission>>('GET', '/social-submissions', {
+    query: { q: params.q, status: params.status, page: params.page, page_size: params.page_size },
+  })
+}
+
+/**
+ * POST /api/social-submissions/:id/review
+ * Body: { verdict: 'ok' | 'bad', note?: string }
+ */
+export function reviewSocialSubmission(
+  id: number,
+  input: { verdict: 'ok' | 'bad'; note?: string },
+): Promise<SocialSubmission> {
+  return request<SocialSubmission>('POST', `/social-submissions/${id}/review`, { body: input })
+}
+
+/**
+ * POST /api/social-submissions/:id/convert-monthly
+ * Body: { note?: string }
+ * Downgrades the Lifetime license that redeemed this coupon to a 30-day Monthly.
+ */
+export function convertSocialSubmissionToMonthly(
+  id: number,
+  input: { note?: string } = {},
+): Promise<SocialSubmission> {
+  return request<SocialSubmission>('POST', `/social-submissions/${id}/convert-monthly`, { body: input })
 }
 
 // ---------------------------------------------------------------------------

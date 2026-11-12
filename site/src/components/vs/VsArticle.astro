@@ -1,0 +1,263 @@
+---
+/**
+ * Full Notchy-style comparison body for one catalog app.
+ * Facts stay honest: unknown prices/OS say “Check vendor”; we disclose NotchOS is ours.
+ */
+import type { VsApp } from '../../data/vs-apps';
+import { VS_CATEGORIES, VS_APPS } from '../../data/vs-apps';
+import { getKindCopy } from '../../data/vs-kinds';
+import { getVsTierA } from '../../data/vs-tier-a';
+import { getVsFact } from '../../data/vs-facts';
+import WhyInstead from './WhyInstead.astro';
+import StacksUp from './StacksUp.astro';
+import FeatureGlance from './FeatureGlance.astro';
+import VsLinkBox from './VsLinkBox.astro';
+
+interface Props {
+  app: VsApp;
+}
+
+const { app } = Astro.props;
+const copy = getKindCopy(app.kind);
+const cat = VS_CATEGORIES.find((c) => c.id === app.category);
+const tier = getVsTierA(app.slug);
+const fact = getVsFact(app.slug);
+const officialUrl = (fact?.url || app.url || '').trim();
+const host = (() => {
+  try {
+    return new URL(officialUrl).host;
+  } catch {
+    return officialUrl.replace(/^https?:\/\//, '');
+  }
+})();
+const hasOfficial = Boolean(officialUrl) && !officialUrl.includes('github.com/search');
+const priceLabel = fact?.priceDisplay || app.price;
+const macosLabel = fact?.macosDisplay || app.macos;
+const trialLabel = fact?.trial || 'Check vendor';
+const openSourceLabel =
+  fact?.openSource === true ? 'Yes' : fact?.openSource === false ? 'No' : 'Check vendor';
+const faqs = copy.faq(app.name);
+const guideLinks = [
+  ...(tier?.mesh ?? []).map((m) => ({ href: m.href, label: m.label })),
+  { href: '/vs', label: `Compare hub — all ${VS_APPS.length} apps` },
+  { href: '/alternatives', label: 'Alternatives index' },
+  { href: '/best-mac-notch-apps', label: 'Best Mac notch apps' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/trial', label: 'Start free trial' },
+];
+
+const h1 =
+  tier?.h1 ??
+  (app.relation === 'beside'
+    ? `${app.name} and NotchOS on Mac`
+    : `${app.name} Alternative: NotchOS vs ${app.name}`);
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const crumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://notch.sagartiwari.net/' },
+    { '@type': 'ListItem', position: 2, name: 'Compare', item: 'https://notch.sagartiwari.net/vs' },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: `vs ${app.name}`,
+      item: `https://notch.sagartiwari.net/vs/${app.slug}`,
+    },
+  ],
+};
+---
+
+<h1>{h1}</h1>
+<p class="prose__meta">
+  {
+    hasOfficial ? (
+      <>
+        Official:{' '}
+        <a href={officialUrl} rel="noopener noreferrer">
+          {host}
+        </a>
+        {' · '}
+      </>
+    ) : (
+      <>Official site: check the vendor listing · </>
+    )
+  }
+  {priceLabel} · {macosLabel}
+  {
+    cat && (
+      <>
+        {' '}
+        · <a href={`/vs#${cat.id}`}>{cat.title}</a>
+      </>
+    )
+  }
+</p>
+
+{
+  tier ? (
+    <p class="vs-tier-lead" set:html={tier.lead} />
+  ) : (
+    <p class="vs-tier-lead">
+      <strong>{app.name}</strong> — {app.blurb}{' '}
+      {hasOfficial ? (
+        <>
+          Looking for {app.name} itself? It lives at{' '}
+          <a href={officialUrl} rel="noopener noreferrer">
+            {host}
+          </a>
+          .{' '}
+        </>
+      ) : null}
+      <strong>NotchOS</strong> is our Mac Dynamic Island for Apple silicon (macOS 26+): tray, clipboard,
+      calendar, timers, teleprompter, Android Share, on-device writing, and system vitals —{' '}
+      <strong>$15 lifetime</strong> or <strong>$3/month</strong>, with a <strong>7-day trial</strong> and no
+      card. We disclose this page is first-party.
+    </p>
+  )
+}
+
+<p class="vs-rel">{copy.relationLead(app.name, app.relation)}</p>
+
+<WhyInstead app={app} />
+{app.category === 'notch' || app.kind === 'island' || app.kind === 'ai-island' ? <StacksUp /> : null}
+<FeatureGlance />
+
+<section class="vs-card">
+  <h2 class="vs-card__title">{app.name} compared with NotchOS</h2>
+  <div class="vs-stacks__scroll" tabindex="0" role="region" aria-label={`${app.name} vs NotchOS`}>
+    <table class="vs-stacks__table vs-stacks__table--pair">
+      <thead>
+        <tr>
+          <th scope="col">Fact</th>
+          <th scope="col">{app.name}</th>
+          <th scope="col" class="is-hl">NotchOS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Price</th>
+          <td>{priceLabel}</td>
+          <td class="is-hl">$15 lifetime · $3 / month</td>
+        </tr>
+        <tr>
+          <th scope="row">Trial</th>
+          <td>{trialLabel}</td>
+          <td class="is-hl">7 days, no card</td>
+        </tr>
+        <tr>
+          <th scope="row">macOS</th>
+          <td>{macosLabel}</td>
+          <td class="is-hl">macOS 26+ · Apple silicon</td>
+        </tr>
+        <tr>
+          <th scope="row">Open source</th>
+          <td>{openSourceLabel}</td>
+          <td class="is-hl">No</td>
+        </tr>
+        <tr>
+          <th scope="row">Main overlap</th>
+          <td>{app.overlap}</td>
+          <td class="is-hl">Multi-face Dynamic Island</td>
+        </tr>
+        <tr>
+          <th scope="row">Official</th>
+          <td>
+            {
+              hasOfficial ? (
+                <a href={officialUrl} rel="noopener noreferrer">
+                  {host}
+                </a>
+              ) : (
+                'Check vendor'
+              )
+            }
+          </td>
+          <td class="is-hl"><a href="/">notch.sagartiwari.net</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="vs-fact-note">
+    {
+      fact ? (
+        <>
+          Competitor figures checked {fact.verifiedAt}
+          {fact.confidence !== 'high' ? ` (${fact.confidence} confidence)` : ''}. Re-verify on the vendor site
+          before you buy
+          {fact.priceSeen ? ` — last seen: ${fact.priceSeen}` : ''}.
+        </>
+      ) : (
+        <>Competitor price and macOS figures are approximate — verify on the vendor site before you buy.</>
+      )
+    }{' '}
+    NotchOS requirements come from the shipped binary (Apple silicon, macOS 26+).
+  </p>
+</section>
+
+<section class="vs-prose-block">
+  <h2>What {app.name} is</h2>
+  <p>
+    {app.name} sits in <strong>{cat?.title ?? app.category}</strong>. {app.blurb}
+    {
+      hasOfficial ? (
+        <>
+          {' '}
+          Official page: <a href={officialUrl} rel="noopener noreferrer">{host}</a>.
+        </>
+      ) : null
+    }
+  </p>
+  {cat?.intro ? <p>{cat.intro}</p> : null}
+</section>
+
+<section class="vs-prose-block">
+  <h2>Where {app.name} goes further</h2>
+  <p>{copy.deeperIntro(app.name)}</p>
+</section>
+
+<section class="vs-prose-block">
+  <h2>Using both</h2>
+  <p>{copy.usingBoth(app.name)}</p>
+</section>
+
+<section class="vs-prose-block">
+  <h2>What NotchOS adds</h2>
+  <p>
+    NotchOS turns the camera housing into a Dynamic Island for Mac — clipboard history, file tray, calendar and
+    tasks, timers and Keep Awake, teleprompter, Android Share, on-device writing (Pro), system vitals, Now Playing,
+    mic mute, Bluetooth battery (Pro), eject, mirror, notes, and more. Start with the{' '}
+    <a href="/trial">7-day trial</a> or see <a href="/#pricing">pricing</a>.
+  </p>
+</section>
+
+<section class="vs-card vs-faq" aria-labelledby={`faq-${app.slug}`}>
+  <h2 class="vs-card__title" id={`faq-${app.slug}`}>{app.name} alternative — FAQ</h2>
+  <div class="faq">
+    {
+      faqs.map((f) => (
+        <details class="faq__item">
+          <summary class="faq__q">{f.q}</summary>
+          <p class="faq__a">{f.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>
+
+<div class="vs-link-grid">
+  <VsLinkBox title="Related guides & compares" links={guideLinks} variant="list" />
+</div>
+
+<script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+<script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />

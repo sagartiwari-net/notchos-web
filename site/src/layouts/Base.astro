@@ -1,23 +1,55 @@
 ---
 import '../styles/global.css';
+import { absoluteUrl } from '../lib/site';
 
 interface Props {
   title: string;
   description: string;
+  /** Path for canonical + OG, e.g. `/blog/foo`. Defaults to current URL pathname. */
+  path?: string;
+  ogType?: 'website' | 'article';
+  /**
+   * @deprecated Site is light-only now; kept for call-site compatibility.
+   */
+  compare?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, path, ogType = 'website' } = Astro.props;
+const pathname = path ?? Astro.url.pathname;
+const canonical = absoluteUrl(pathname.endsWith('/') && pathname !== '/' ? pathname.slice(0, -1) : pathname);
+const ogImage = absoluteUrl('/og.png');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="theme-compare" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#060607" />
+    <script is:inline>
+      (function () {
+        try {
+          localStorage.removeItem('notchos-theme');
+        } catch (e) {}
+        var root = document.documentElement;
+        root.setAttribute('data-theme', 'light');
+        root.style.colorScheme = 'light';
+      })();
+    </script>
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f4f4f2" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="NotchOS" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>

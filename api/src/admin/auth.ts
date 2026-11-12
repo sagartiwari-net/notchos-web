@@ -117,11 +117,19 @@ function hostOfUrl(text: string): string | null {
   }
 }
 
+function isLoopbackHost(host: string): boolean {
+  const name = host.split(':')[0] ?? '';
+  return name === '127.0.0.1' || name === 'localhost' || name === '::1';
+}
+
 /**
  * A browser sends Origin with every POST and PUT. The write is accepted when that host is
  * the host the request was addressed to or the host of SITE_URL. Without an Origin header
  * the Referer is used the same way. With neither, the write is refused. (The session
  * cookie is SameSite=Strict as well, so this is a second layer.)
+ *
+ * Local development: Vite serves the admin on :4311 and proxies /api → API :4310, so the
+ * browser Origin port differs from the API Host. Loopback Origins are accepted there only.
  */
 export function writeComesFromSameSite(request: FastifyRequest, config: Config): boolean {
   const allowed = new Set<string>([normalizeHost(request.host)]);
@@ -132,12 +140,16 @@ export function writeComesFromSameSite(request: FastifyRequest, config: Config):
   const origin = headerText(request, 'origin');
   if (origin !== null) {
     const host = hostOfUrl(origin);
-    return host !== null && allowed.has(host);
+    if (host === null) return false;
+    if (allowed.has(host)) return true;
+    return config.nodeEnv === 'development' && isLoopbackHost(host) && isLoopbackHost(request.host);
   }
   const referer = headerText(request, 'referer');
   if (referer !== null) {
     const host = hostOfUrl(referer);
-    return host !== null && allowed.has(host);
+    if (host === null) return false;
+    if (allowed.has(host)) return true;
+    return config.nodeEnv === 'development' && isLoopbackHost(host) && isLoopbackHost(request.host);
   }
   return false;
 }

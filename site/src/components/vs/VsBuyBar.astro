@@ -1,0 +1,29 @@
+---
+/** Top conversion prompt — Notchy-style Try + Buy. */
+interface Props {
+  competitor?: string;
+}
+const { competitor } = Astro.props;
+---
+
+<aside class="vs-buy" aria-label="Try or buy NotchOS">
+  <p class="vs-buy__pitch">
+    {
+      competitor ? (
+        <>
+          Comparing <strong>{competitor}</strong>? NotchOS is <strong>$15 lifetime</strong> or <strong>$3/mo</strong> —
+          7-day trial, no card.
+        </>
+      ) : (
+        <>
+          NotchOS — Mac Dynamic Island for tray, clipboard, timers, teleprompter, Android Share & more.
+          <strong> $15 lifetime</strong> · <strong>$3/mo</strong> · 7-day trial.
+        </>
+      )
+    }
+  </p>
+  <div class="vs-buy__actions">
+    <a class="vs-btn vs-btn--primary" href="/trial">Try Free for 7 Days</a>
+    <a class="vs-btn vs-btn--secondary" href="/#pricing">Buy NotchOS $15</a>
+  </div>
+</aside>

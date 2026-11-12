@@ -34,6 +34,8 @@ import Timers from './faces/Timers.astro';
 import Prompter from './faces/Prompter.astro';
 import System from './faces/System.astro';
 import Tools from './faces/Tools.astro';
+import AndroidShare from './faces/AndroidShare.astro';
+import Translate from './faces/Translate.astro';
 import AI from './faces/AI.astro';
 import type { IconName } from '../../lib/icons';
 import {
@@ -87,6 +89,8 @@ const TAB_ICON: Record<Face, IconName> = {
   home: 'house',
   tray: 'tray-fill',
   tools: 'grid',
+  android: 'phone-arrow',
+  translate: 'translate',
   timers: 'timer',
   prompter: 'prompter',
   tasks: 'checklist',
@@ -175,6 +179,8 @@ const compact = MODE_SPECS.compact.faces;
                     {name === 'prompter' && <Prompter />}
                     {name === 'system' && <System uid={id} />}
                     {name === 'tools' && <Tools />}
+                    {name === 'android' && <AndroidShare />}
+                    {name === 'translate' && <Translate />}
                     {name === 'ai' && <AI />}
                   </div>
                 ))}

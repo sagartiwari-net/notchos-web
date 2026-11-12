@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://notch.sagartiwari.net/sitemap-index.xml

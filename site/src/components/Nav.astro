@@ -1,19 +1,20 @@
 ---
 /**
- * Section 9 item 1: nav, plus the facts strip that hangs from the top edge like a notch.
+ * Nav + the facts strip that hangs from the top edge like a notch.
  *
- * The strip is "Apple silicon · macOS 26+ · price". The price is not decided yet (WEB plan
- * decision 12), so its slot stays in the markup, hidden, and the strip reads fine without it.
- * S2 fills [data-fact="price"] from /api/pay/config and removes `hidden`.
+ * The strip sits in the middle of the window, so the links have to end before it. Four links
+ * and the button fit beside it from 1200px up; the two marked --extra go first (page.css).
+ * Preview and FAQ are not here on purpose: the preview is the first thing under the hero, and
+ * FAQ is in the footer. Six links ran under the strip.
  */
 import Logo from './Logo.astro';
 ---
 
-<header class="nav">
+<header class="nav nav--compare">
   <div class="factnotch" role="note" aria-label="Requirements">
     <span>Apple silicon</span>
     <span class="factnotch__dot" aria-hidden="true"></span>
-    <span>macOS 12 or later</span>
+    <span>macOS 26 or later</span>
     <span class="factnotch__dot" data-fact-sep="price" aria-hidden="true" hidden></span>
     <span data-fact="price" hidden></span>
   </div>
@@ -23,11 +24,11 @@ import Logo from './Logo.astro';
       <span>NotchOS</span>
     </a>
     <nav class="nav__links" aria-label="Main">
-      <a class="nav__link" href="/#stage">Preview</a>
       <a class="nav__link nav__link--extra" href="/#features">Features</a>
       <a class="nav__link" href="/#pricing">Pricing</a>
-      <a class="nav__link nav__link--extra" href="/#faq">FAQ</a>
-      <a class="btn btn--primary btn--small nav__cta" href="/download">Download</a>
+      <a class="nav__link nav__link--extra" href="/blog">Guides</a>
+      <a class="nav__link" href="/vs">Compare</a>
+      <a class="btn btn--primary btn--small nav__cta" href="/trial">Try Free</a>
     </nav>
   </div>
 </header>

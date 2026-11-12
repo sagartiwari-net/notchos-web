@@ -15,13 +15,15 @@
 export const FACES = [
   'home',
   'tray',
-  'clipboard',
-  'calendar',
-  'tasks',
+  'tools',
+  'android',
+  'translate',
   'timers',
   'prompter',
+  'tasks',
+  'calendar',
+  'clipboard',
   'system',
-  'tools',
   'ai',
 ] as const;
 
@@ -30,21 +32,25 @@ export type Face = (typeof FACES)[number];
 export const FACE_LABEL: Record<Face, string> = {
   home: 'Home',
   tray: 'Tray',
-  clipboard: 'Clipboard',
-  calendar: 'Calendar',
-  tasks: 'Tasks',
+  tools: 'Tools',
+  android: 'Android Share',
+  translate: 'Translate',
   timers: 'Timers',
   prompter: 'Prompter',
+  tasks: 'Tasks',
+  calendar: 'Calendar',
+  clipboard: 'Clipboard',
   system: 'System',
-  tools: 'Tools',
   ai: 'AI',
 };
 
-/** Tab order inside the island, as SurfaceRoot.tabBar lays it out. */
+/** Tab order inside the island — matches Lumen LipTabStrip. */
 export const ISLAND_TABS: readonly Face[] = [
   'home',
   'tray',
   'tools',
+  'android',
+  'translate',
   'timers',
   'prompter',
   'tasks',
@@ -76,14 +82,14 @@ export interface ModeSpec {
 }
 
 export const MODE_SPECS: Record<Mode, ModeSpec> = {
-  /** The app's own sizes: ShelfFace.preferredOpen is 740 wide, height = minimumOpen.height. */
+  /** Current app sizes: ShelfFace.preferredOpen ~860–960 wide, faceOpenHeight 320. */
   wide: {
     // The app measures the real cutout (about 185 x 32 pt on a 14-inch MacBook Pro).
     // 184 keeps every edge on a whole pixel around the centre line.
     housing: { w: 184, h: 32 },
     rest: { u: 7, l: 12 },
     peek: { dw: 16, dh: 6, u: 8, l: 14 },
-    open: { w: 740, u: 18, l: 28 },
+    open: { w: 900, u: 18, l: 28 },
     earPad: 10,
     // GlanceSlot.wingExtra, from GlanceHub.persistentRanked and pushHUD.
     extra: {
@@ -97,16 +103,18 @@ export const MODE_SPECS: Record<Mode, ModeSpec> = {
     },
     balanceMax: 84,
     faces: {
-      home: 280,
-      tray: 350,
-      timers: 340,
-      prompter: 480,
-      tasks: 410,
-      calendar: 420,
-      clipboard: 430,
-      system: 420,
-      tools: 430,
-      ai: 560,
+      home: 300,
+      tray: 320,
+      tools: 320,
+      android: 320,
+      translate: 320,
+      timers: 320,
+      prompter: 320,
+      tasks: 320,
+      calendar: 320,
+      clipboard: 320,
+      system: 320,
+      ai: 320,
     },
   },
   /**
@@ -134,15 +142,17 @@ export const MODE_SPECS: Record<Mode, ModeSpec> = {
     balanceMax: 40,
     faces: {
       home: 290,
-      tray: 318,
-      timers: 322,
-      prompter: 336,
-      tasks: 368,
-      calendar: 418,
-      clipboard: 372,
-      system: 392,
-      tools: 392,
-      ai: 444,
+      tray: 310,
+      tools: 320,
+      android: 320,
+      translate: 320,
+      timers: 320,
+      prompter: 330,
+      tasks: 340,
+      calendar: 360,
+      clipboard: 340,
+      system: 340,
+      ai: 360,
     },
   },
 };
@@ -154,7 +164,7 @@ export const HAIRLINE = 0.8;
 export const REST_INSET = 1;
 
 /** Sliding clip window that hides face content outside the island while it morphs. */
-export const CLIP = { w: 760, h: 600 };
+export const CLIP = { w: 960, h: 600 };
 
 /**
  * Base sizes of the scaled lip pieces. They must match src/styles/notch.css.

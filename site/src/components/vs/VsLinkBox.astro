@@ -1,0 +1,40 @@
+---
+interface Link {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  title: string;
+  links: Link[];
+  /** pills = vs chips; list = underlined text links */
+  variant?: 'pills' | 'list';
+}
+
+const { title, links, variant = 'pills' } = Astro.props;
+---
+
+{
+  links.length > 0 && (
+    <section class="vs-link-box">
+      <h2 class="vs-link-box__title">{title}</h2>
+      {variant === 'pills' ? (
+        <div class="vs-link-box__pills">
+          {links.map((l) => (
+            <a class="vs-pill" href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <ul class="vs-link-box__list">
+          {links.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}

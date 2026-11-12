@@ -1,0 +1,21 @@
+---
+import {
+  NOTCHOS_FEATURES_MORE,
+  NOTCHOS_FEATURES_PRIMARY,
+  NOTCHOS_FEATURE_TOTAL,
+} from '../../data/notchos-features';
+---
+
+<section class="vs-card vs-glance">
+  <p class="vs-glance__badge"><span class="vs-glance__dot" aria-hidden="true"></span> At a glance</p>
+  <h2 class="vs-card__title">Everything NotchOS does, in one app</h2>
+  <ul class="vs-glance__list">
+    {NOTCHOS_FEATURES_PRIMARY.map((f) => <li>{f}</li>)}
+  </ul>
+  <details class="vs-glance__more">
+    <summary>Show all {NOTCHOS_FEATURE_TOTAL}</summary>
+    <ul class="vs-glance__list">
+      {NOTCHOS_FEATURES_MORE.map((f) => <li>{f}</li>)}
+    </ul>
+  </details>
+</section>

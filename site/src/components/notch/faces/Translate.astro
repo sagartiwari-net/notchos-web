@@ -1,0 +1,33 @@
+---
+/**
+ * Translate face — Kit → Translate shortcut from the current LipTabStrip.
+ * Source: Lumen KitChrome translate pane.
+ */
+import FaceHead from '../FaceHead.astro';
+import Icon from '../../Icon.astro';
+---
+
+<div class="xlate">
+  <FaceHead icon="translate" title="Translate" tint="color-plate-violet">
+    <span class="chip chip--secondary">Swap</span>
+  </FaceHead>
+
+  <div class="xlate__langs">
+    <span class="chip is-on">English</span>
+    <span class="roundbtn" title="Swap languages"><Icon name="arrow-right" size={12} weight={2.4} /></span>
+    <span class="chip is-on">Hindi</span>
+    <span class="xlate__gap"></span>
+    <span class="chip chip--primary">Translate</span>
+  </div>
+
+  <div class="xlate__grid">
+    <div class="xlate__box">
+      <div class="xlate__label">From</div>
+      <div class="xlate__text">Put the notch to work — clipboard, tray, and tools in one place.</div>
+    </div>
+    <div class="xlate__box xlate__box--out">
+      <div class="xlate__label">To</div>
+      <div class="xlate__text">नॉच को काम में लाओ — क्लिपबोर्ड, ट्रे और टूल्स एक ही जगह।</div>
+    </div>
+  </div>
+</div>

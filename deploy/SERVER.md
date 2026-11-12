@@ -6,7 +6,7 @@ Temporary public stack until a dedicated product domain exists.
 |---|---|
 | Marketing site | `https://notch.sagartiwari.net/` |
 | Download page | `https://notch.sagartiwari.net/download` |
-| DMG file | `https://notch.sagartiwari.net/downloads/NotchOS-0.7.0.dmg` |
+| DMG file (always latest) | `https://notch.sagartiwari.net/downloads/NotchOS.dmg` |
 | Admin UI | `https://notch.sagartiwari.net/admin/` (**mock data until W2** — create real licenses with CLI) |
 | License API | `https://notch.sagartiwari.net/v1/*` → Node on **127.0.0.1:4391** |
 
@@ -142,19 +142,28 @@ curl -sS https://notch.sagartiwari.net/v1/health
 
 ## 7) Upload the DMG
 
+Always publish under the **fixed** public name `NotchOS.dmg` so emails and bookmarks keep working after version bumps. Optionally also keep a versioned archive beside it.
+
 On the Mac (after `make dmg-staging`):
 
 ```bash
-scp "/Volumes/Samsung 1TB/REA/Lumen/dist/NotchOS-0.7.0.dmg" \
-  root@YOUR_SERVER:/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.7.0.dmg
+VER=0.8.33
+scp "/Volumes/Samsung 1TB/REA/Lumen/dist/NotchOS-${VER}.dmg" \
+  root@YOUR_SERVER:/www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-${VER}.dmg
+ssh root@YOUR_SERVER 'cp -f /www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-'"${VER}"'.dmg \
+  /www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS.dmg \
+  && chown www:www /www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS*.dmg'
 ```
 
-On the server:
+Or on the server after a GitHub release: `VERSION=0.8.33 bash deploy/fetch-dmg.sh`
+
+Verify:
 
 ```bash
-chown www:www /www/wwwroot/notch.sagartiwari.net/public/downloads/NotchOS-0.7.0.dmg
-curl -sSIL https://notch.sagartiwari.net/downloads/NotchOS-0.7.0.dmg | head
+curl -sSIL https://notch.sagartiwari.net/downloads/NotchOS.dmg | head
 ```
+
+Set `DOWNLOAD_URL=https://notch.sagartiwari.net/downloads/NotchOS.dmg` in `/www/server/notchos/api.env` (and admin settings) — never a versioned path.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 /**
- * Pricing. PayPal checkout arrives in W3 — buttons are presentational until then.
- * Placeholder prices for local review; final prices still open (WEB plan decision 12).
+ * Pricing — locked: Monthly $3 · Lifetime $15.
+ * PayPal when credentials exist; local DEV purchase otherwise.
  */
 ---
 
@@ -10,8 +10,8 @@
     <p class="section__eyebrow">Pricing</p>
     <h2 class="section__title" id="pricing-title">One key. One Mac. Your choice of plan.</h2>
     <p class="section__lead">
-      Start a 7-day trial in the app — no card. When you buy, the key is emailed to your PayPal address. Paste
-      email + key in NotchOS to activate.
+      Start a 7-day trial in the app — no card. When you buy, the key and invoice go to your PayPal
+      email. Paste email + key in NotchOS to activate.
     </p>
   </header>
 
@@ -19,50 +19,418 @@
     <article class="price-card">
       <h3 class="price-card__plan">Free trial</h3>
       <p class="price-card__price"><span class="price-card__amount">$0</span><span class="price-card__per"> / 7 days</span></p>
-      <p class="price-card__note">Email for the download, then start inside the Mac app. No card.</p>
+      <p class="price-card__note">Download, then start inside the Mac app. No card. One trial per Mac.</p>
       <ul class="price-card__list">
         <li>Full NotchOS unlocked for 7 days</li>
-        <li>One trial per Mac</li>
+        <li>Tracked per Mac — reinstall does not reset</li>
         <li>Buy anytime to keep going</li>
       </ul>
       <a class="btn btn--ghost price-card__cta" href="/trial">Start free trial</a>
     </article>
 
-    <article class="price-card">
+    <article class="price-card" data-plan="monthly">
       <h3 class="price-card__plan">Monthly</h3>
-      <p class="price-card__price"><span class="price-card__amount">$9</span><span class="price-card__per">/mo</span></p>
-      <p class="price-card__note">Placeholder price for local preview. Final amount set at launch.</p>
+      <p class="price-card__price">
+        <span class="price-card__amount" data-price="monthly">$3</span><span class="price-card__per">/mo</span>
+      </p>
+      <p class="price-card__note">Cancel anytime in PayPal. Share coupons do not apply.</p>
       <ul class="price-card__list">
         <li>Full NotchOS unlocked</li>
         <li>Same key while you renew</li>
-        <li>Cancel anytime in PayPal</li>
-        <li>1 Mac per key (transfers available)</li>
+        <li>Cancel in PayPal Automatic payments</li>
+        <li>1 Mac per key</li>
       </ul>
-      <button class="btn btn--ghost price-card__cta" type="button" disabled>
-        Buy with PayPal — soon
+      <button class="btn btn--ghost price-card__cta" type="button" data-buy="monthly" disabled>
+        Loading…
       </button>
     </article>
 
-    <article class="price-card price-card--featured">
-      <p class="price-card__badge">Most chosen</p>
+    <article class="price-card price-card--featured" data-plan="lifetime">
+      <p class="price-card__badge">Best value</p>
       <h3 class="price-card__plan">Lifetime</h3>
-      <p class="price-card__price"><span class="price-card__amount">$79</span><span class="price-card__per"> once</span></p>
-      <p class="price-card__note">Placeholder price for local preview. Final amount set at launch.</p>
+      <p class="price-card__price">
+        <span class="price-card__amount" data-price="lifetime">$15</span><span class="price-card__per"> once</span>
+      </p>
+      <p class="price-card__note">
+        Pay once, keep Pro. Optional share discount up to 20% — <strong>Lifetime only</strong>.
+      </p>
       <ul class="price-card__list">
         <li>Pay once, keep Pro</li>
         <li>Same key forever</li>
-        <li>1 Mac per key (transfers available)</li>
+        <li>1 Mac per key</li>
         <li>Updates included</li>
       </ul>
-      <button class="btn btn--primary price-card__cta" type="button" disabled>
-        Buy with PayPal — soon
+      <label class="price-card__coupon">
+        <span>Coupon (optional)</span>
+        <input type="text" name="coupon" data-coupon autocomplete="off" spellcheck="false" placeholder="NOS-SHARE-XXXX-XXXX" />
+        <span class="price-card__coupon-msg" data-coupon-msg hidden></span>
+      </label>
+      <button class="btn btn--primary price-card__cta" type="button" data-buy="lifetime" disabled>
+        Loading…
       </button>
+      <p class="price-card__extra">
+        <a href="/discount">Get up to 20% extra discount now</a>
+        <span class="price-card__extra-note">Lifetime only · one-time code</span>
+      </p>
     </article>
   </div>
 
+  <div class="price-checkout" data-checkout hidden>
+    <p class="price-checkout__title" data-checkout-title></p>
+    <label class="price-checkout__email">
+      <span>PayPal email (key + invoice go here)</span>
+      <input type="email" name="payer_email" data-payer-email required autocomplete="email" placeholder="you@paypal.com" />
+    </label>
+    <div class="price-checkout__actions">
+      <button type="button" class="btn btn--primary" data-checkout-confirm>Confirm purchase</button>
+      <button type="button" class="btn btn--ghost" data-checkout-cancel>Cancel</button>
+    </div>
+    <p class="price-checkout__status" data-checkout-status hidden></p>
+    <pre class="price-checkout__key" data-checkout-key hidden></pre>
+  </div>
+
+  <div id="paypal-buttons" class="price-paypal" data-paypal-buttons hidden></div>
+
   <ul class="price-foot" aria-label="Good to know">
-    <li>7-day in-app trial, no card</li>
-    <li>Refund window will be listed before launch</li>
+    <li>7-day in-app trial, no card — one per Mac</li>
+    <li>Key + invoice emailed to your PayPal address</li>
+    <li>Share coupons apply only to Lifetime (max 20%)</li>
     <li>Lost key? Use <a href="/recover">Recover</a></li>
   </ul>
 </section>
+
+<style>
+  .price-card__extra {
+    margin: 0.75rem 0 0;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  .price-card__extra a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .price-card__extra-note {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--cmp-ink-3);
+    font-size: 0.8rem;
+  }
+  .price-card__coupon {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0.85rem 0 0.5rem;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cmp-ink-2);
+  }
+  .price-card__coupon input,
+  .price-checkout__email input {
+    width: 100%;
+    border: 1px solid var(--cmp-border-strong);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--cmp-panel);
+    color: var(--cmp-ink-1);
+    font: inherit;
+    font-weight: 400;
+  }
+  .price-card__coupon input:focus-visible,
+  .price-checkout__email input:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .price-card__coupon-msg {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--cmp-ink-2);
+  }
+  .price-checkout {
+    margin: 1.5rem auto 0;
+    max-width: 28rem;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--cmp-border);
+    border-radius: 0.9rem;
+    background: var(--cmp-panel);
+    box-shadow: var(--cmp-shadow-lift);
+  }
+  .price-checkout__title {
+    margin: 0 0 0.75rem;
+    font-weight: 650;
+  }
+  .price-checkout__email {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--cmp-ink-2);
+  }
+  .price-checkout__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+  .price-checkout__status {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    color: var(--cmp-good);
+  }
+  .price-checkout__status[data-ok='0'] {
+    color: var(--cmp-bad);
+  }
+  .price-checkout__key {
+    margin: 0.6rem 0 0;
+    padding: 0.7rem;
+    overflow: auto;
+    border: 1px solid var(--cmp-border);
+    border-radius: 0.55rem;
+    background: var(--cmp-bg);
+    color: var(--cmp-ink-1);
+    font-size: 0.85rem;
+  }
+  .price-paypal {
+    margin: 1.25rem auto 0;
+    max-width: 28rem;
+    min-height: 3rem;
+  }
+</style>
+
+<script>
+  const root = document.getElementById('pricing');
+  if (root) {
+    const buyMonthly = /** @type {HTMLButtonElement | null} */ (root.querySelector('[data-buy="monthly"]'));
+    const buyLifetime = /** @type {HTMLButtonElement | null} */ (root.querySelector('[data-buy="lifetime"]'));
+    const couponInput = /** @type {HTMLInputElement | null} */ (root.querySelector('[data-coupon]'));
+    const couponMsg = /** @type {HTMLElement | null} */ (root.querySelector('[data-coupon-msg]'));
+    const checkout = /** @type {HTMLElement | null} */ (root.querySelector('[data-checkout]'));
+    const checkoutTitle = /** @type {HTMLElement | null} */ (root.querySelector('[data-checkout-title]'));
+    const payerEmail = /** @type {HTMLInputElement | null} */ (root.querySelector('[data-payer-email]'));
+    const confirmBtn = /** @type {HTMLButtonElement | null} */ (root.querySelector('[data-checkout-confirm]'));
+    const cancelBtn = /** @type {HTMLButtonElement | null} */ (root.querySelector('[data-checkout-cancel]'));
+    const statusEl = /** @type {HTMLElement | null} */ (root.querySelector('[data-checkout-status]'));
+    const keyEl = /** @type {HTMLElement | null} */ (root.querySelector('[data-checkout-key]'));
+    const paypalHost = /** @type {HTMLElement | null} */ (root.querySelector('[data-paypal-buttons]'));
+
+    /** @type {any} */
+    let config = null;
+    /** @type {'monthly' | 'lifetime' | null} */
+    let pendingPlan = null;
+    /** @type {number | null} */
+    let couponPercent = null;
+    /** @type {string | null} */
+    let amountAfter = null;
+
+    function money(amount: string) {
+      const n = Number(amount);
+      return Number.isFinite(n) ? `$${n % 1 === 0 ? String(n) : n.toFixed(2)}` : `$${amount}`;
+    }
+
+    function setBusy(busy: boolean) {
+      if (buyMonthly) buyMonthly.disabled = busy || !config;
+      if (buyLifetime) buyLifetime.disabled = busy || !config;
+      if (confirmBtn) confirmBtn.disabled = busy;
+    }
+
+    function showStatus(text: string, ok = true) {
+      if (!statusEl) return;
+      statusEl.hidden = false;
+      statusEl.textContent = text;
+      statusEl.dataset.ok = ok ? '1' : '0';
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/pay/config');
+        const json = await res.json();
+        config = json;
+        const monthlyEl = root.querySelector('[data-price="monthly"]');
+        const lifetimeEl = root.querySelector('[data-price="lifetime"]');
+        if (monthlyEl) monthlyEl.textContent = money(config.prices.monthly);
+        if (lifetimeEl) lifetimeEl.textContent = money(config.prices.lifetime);
+        const label = config.paypal_ready ? 'Buy with PayPal' : 'Buy (local DEV)';
+        if (buyMonthly) {
+          buyMonthly.disabled = false;
+          buyMonthly.textContent = label;
+        }
+        if (buyLifetime) {
+          buyLifetime.disabled = false;
+          buyLifetime.textContent = label;
+        }
+      } catch {
+        if (buyMonthly) buyMonthly.textContent = 'Checkout unavailable';
+        if (buyLifetime) buyLifetime.textContent = 'Checkout unavailable';
+      }
+    }
+
+    async function validateCoupon() {
+      if (!couponInput || !couponMsg) return;
+      const code = couponInput.value.trim();
+      couponPercent = null;
+      amountAfter = null;
+      if (!code) {
+        couponMsg.hidden = true;
+        couponMsg.textContent = '';
+        return;
+      }
+      const res = await fetch('/api/pay/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, plan: 'lifetime' }),
+      });
+      const json = await res.json();
+      couponMsg.hidden = false;
+      if (json.ok) {
+        couponPercent = json.percent;
+        amountAfter = json.amount_after;
+        couponMsg.textContent = `${json.percent}% off → $${json.amount_after}`;
+      } else {
+        couponMsg.textContent = json.message || 'Coupon not valid.';
+      }
+    }
+
+    /** @param {'monthly' | 'lifetime'} plan */
+    function openCheckout(plan) {
+      pendingPlan = plan;
+      if (!checkout || !checkoutTitle || !config) return;
+      const list = plan === 'monthly' ? config.prices.monthly : amountAfter || config.prices.lifetime;
+      const couponBit =
+        plan === 'lifetime' && couponInput?.value.trim()
+          ? ` · coupon ${couponInput.value.trim()}${couponPercent ? ` (−${couponPercent}%)` : ''}`
+          : '';
+      checkoutTitle.textContent = `${plan === 'monthly' ? 'Monthly' : 'Lifetime'} · ${money(list)}${couponBit}`;
+      checkout.hidden = false;
+      if (statusEl) statusEl.hidden = true;
+      if (keyEl) {
+        keyEl.hidden = true;
+        keyEl.textContent = '';
+      }
+      payerEmail?.focus();
+    }
+
+    async function runDevPurchase() {
+      if (!pendingPlan || !payerEmail || !config) return;
+      const email = payerEmail.value.trim();
+      if (!email.includes('@')) {
+        showStatus('Enter the PayPal email that should receive the key.', false);
+        return;
+      }
+      setBusy(true);
+      showStatus('Creating license…');
+      try {
+        /** @type {Record<string, string>} */
+        const body = { plan: pendingPlan, payer_email: email };
+        if (pendingPlan === 'lifetime' && couponInput?.value.trim()) {
+          body.coupon_code = couponInput.value.trim();
+        }
+        const res = await fetch('/api/pay/dev-purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) {
+          showStatus(json.message || 'Purchase failed.', false);
+          return;
+        }
+        showStatus(
+          `Done. Invoice ${json.invoice_number} · key emailed to ${json.email}. Local DEV also shows the key below.`,
+        );
+        if (keyEl && json.key) {
+          keyEl.hidden = false;
+          keyEl.textContent = json.key;
+        }
+      } catch {
+        showStatus('Network error. Try again.', false);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    /** @param {'monthly' | 'lifetime'} plan */
+    async function runPayPal(plan) {
+      if (!config?.paypal_client_id || !paypalHost) return;
+      setBusy(true);
+      try {
+        /** @type {Record<string, string>} */
+        const body = { plan };
+        if (plan === 'lifetime' && couponInput?.value.trim()) {
+          body.coupon_code = couponInput.value.trim();
+        }
+        const createRes = await fetch('/api/pay/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const created = await createRes.json();
+        if (!createRes.ok || !created.order_id) {
+          showStatus(created.message || 'Could not start PayPal.', false);
+          if (checkout) checkout.hidden = false;
+          return;
+        }
+
+        if (!document.getElementById('paypal-sdk')) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.id = 'paypal-sdk';
+            script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(config!.paypal_client_id!)}&currency=USD&intent=capture`;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('PayPal SDK failed to load'));
+            document.head.appendChild(script);
+          });
+        }
+
+        paypalHost.hidden = false;
+        paypalHost.innerHTML = '';
+        // PayPal JS SDK attaches window.paypal after script load.
+        window.paypal
+          .Buttons({
+            createOrder: () => created.order_id,
+            onApprove: async () => {
+              const cap = await fetch(`/api/pay/orders/${encodeURIComponent(created.order_id)}/capture`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+              });
+              const json = await cap.json();
+              if (checkout) checkout.hidden = false;
+              if (!cap.ok || !json.ok) {
+                showStatus(json.message || 'Capture failed.', false);
+                return;
+              }
+              showStatus(`Paid. Invoice ${json.invoice_number} · key emailed to ${json.email}.`);
+            },
+            onError: () => showStatus('PayPal error. Try again.', false),
+          })
+          .render(paypalHost);
+      } catch (err) {
+        showStatus(err instanceof Error ? err.message : 'PayPal checkout failed.', false);
+        if (checkout) checkout.hidden = false;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    buyMonthly?.addEventListener('click', () => {
+      if (!config) return;
+      if (config.paypal_ready) void runPayPal('monthly');
+      else openCheckout('monthly');
+    });
+    buyLifetime?.addEventListener('click', async () => {
+      if (!config) return;
+      await validateCoupon();
+      if (config.paypal_ready) void runPayPal('lifetime');
+      else openCheckout('lifetime');
+    });
+    couponInput?.addEventListener('change', () => void validateCoupon());
+    couponInput?.addEventListener('blur', () => void validateCoupon());
+    cancelBtn?.addEventListener('click', () => {
+      if (checkout) checkout.hidden = true;
+      pendingPlan = null;
+    });
+    confirmBtn?.addEventListener('click', () => void runDevPurchase());
+
+    void loadConfig();
+  }
+</script>

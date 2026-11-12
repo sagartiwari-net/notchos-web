@@ -301,6 +301,45 @@ export interface TrialListParams extends PageParams {
   state?: TrialState
 }
 
+// ---------------------------------------------------------------------------
+// Social share submissions
+// ---------------------------------------------------------------------------
+
+export type SocialSubmissionStatus =
+  | 'submitted'
+  | 'coupon_issued'
+  | 'reviewed_ok'
+  | 'reviewed_bad'
+  | 'converted_monthly'
+
+export interface SocialSubmission {
+  id: number
+  contact_email: string
+  linkedin_url: string | null
+  facebook_url: string | null
+  instagram_url: string | null
+  instagram_profile_url: string | null
+  x_url: string | null
+  networks_claimed: number
+  percent_requested: number
+  coupon_id: number | null
+  coupon_code: string | null
+  coupon_status: string | null
+  coupon_redeemed: boolean
+  payer_email: string | null
+  license_id: number | null
+  license_plan: LicensePlan | null
+  status: SocialSubmissionStatus
+  admin_note: string | null
+  reviewed_at: IsoDateTime | null
+  created_at: IsoDateTime
+}
+
+export interface SocialSubmissionListParams extends PageParams {
+  q?: string
+  status?: SocialSubmissionStatus
+}
+
 /**
  * Body for POST /api/trials: grant or look up a trial by Mac device id.
  * Same shape the Mac app sends to POST /v1/trial.
