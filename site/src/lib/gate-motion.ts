@@ -126,47 +126,102 @@ function spawnBurst(host: HTMLElement, tl: gsap.core.Timeline, at: number) {
 
 type ProgressUi = {
   mark: HTMLElement | null;
-  ring: SVGCircleElement | null;
-  label: HTMLElement | null;
+  ring: SVGGeometryElement | null;
+  meta: HTMLElement | null;
+  pctEl: HTMLElement | null;
+  detailEl: HTMLElement | null;
+  fill: HTMLElement | null;
   button: HTMLButtonElement | HTMLAnchorElement | null;
   idleLabel: string;
+};
+
+type TransferProgress = {
+  received: number;
+  total: number;
+  bytesPerSec: number | null;
 };
 
 function progressUi(button: HTMLElement): ProgressUi {
   const mark = document.querySelector<HTMLElement>('[data-gate-island]');
   return {
     mark,
-    ring: mark?.querySelector<SVGCircleElement>('[data-gate-progress-bar]') ?? null,
-    label: mark?.querySelector<HTMLElement>('[data-gate-progress-label]') ?? null,
+    ring: mark?.querySelector<SVGGeometryElement>('[data-gate-progress-bar]') ?? null,
+    meta: mark?.querySelector<HTMLElement>('[data-gate-progress-meta]') ?? null,
+    pctEl: mark?.querySelector<HTMLElement>('[data-gate-progress-pct]') ?? null,
+    detailEl: mark?.querySelector<HTMLElement>('[data-gate-progress-detail]') ?? null,
+    fill: mark?.querySelector<HTMLElement>('[data-gate-progress-fill]') ?? null,
     button: button as HTMLButtonElement | HTMLAnchorElement,
     idleLabel: button.textContent?.trim() || 'Download',
   };
 }
 
-function setProgress(ui: ProgressUi, ratio: number | null, text: string) {
+function formatBytes(n: number): string {
+  if (!Number.isFinite(n) || n < 0) return '0 B';
+  if (n < 1024) return `${Math.round(n)} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(n < 10 * 1024 ? 1 : 0)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(n < 10 * 1024 * 1024 ? 2 : 1)} MB`;
+}
+
+function formatSpeed(bps: number | null): string {
+  if (bps == null || !Number.isFinite(bps) || bps <= 0) return '';
+  if (bps < 1024 * 1024) return `${(bps / 1024).toFixed(0)} KB/s`;
+  return `${(bps / (1024 * 1024)).toFixed(1)} MB/s`;
+}
+
+function setProgress(ui: ProgressUi, transfer: TransferProgress | 'indeterminate' | 'done', status?: string) {
   ui.mark?.classList.add('is-downloading');
-  if (ui.label) {
-    ui.label.hidden = false;
-    ui.label.textContent = text;
+  if (ui.meta) ui.meta.hidden = false;
+
+  if (transfer === 'indeterminate') {
+    ui.mark?.classList.add('is-indeterminate');
+    if (ui.pctEl) ui.pctEl.textContent = '…';
+    if (ui.detailEl) ui.detailEl.textContent = status || 'Starting download…';
+    if (ui.fill) ui.fill.style.width = '35%';
+    if (ui.ring) ui.ring.style.strokeDashoffset = '72';
+    return;
+  }
+
+  ui.mark?.classList.remove('is-indeterminate');
+  const received = transfer === 'done' ? 1 : transfer.received;
+  const total = transfer === 'done' ? 1 : transfer.total;
+  const ratio = transfer === 'done' ? 1 : total > 0 ? Math.min(1, received / total) : null;
+  const pct = ratio == null ? null : Math.round(ratio * 100);
+
+  if (ui.pctEl) {
+    ui.pctEl.textContent = pct == null ? formatBytes(received) : `${pct}%`;
+  }
+  if (ui.detailEl) {
+    if (transfer === 'done') {
+      ui.detailEl.textContent = status || 'Saving…';
+    } else {
+      const sizePart = total > 0 ? `${formatBytes(received)} / ${formatBytes(total)}` : formatBytes(received);
+      const speedPart = formatSpeed(transfer.bytesPerSec);
+      ui.detailEl.textContent = [sizePart, speedPart, status].filter(Boolean).join(' · ');
+    }
+  }
+  if (ui.fill) {
+    ui.fill.style.width = pct == null ? '35%' : `${pct}%`;
   }
   if (ui.ring) {
-    const pct = ratio == null ? 8 : Math.max(0, Math.min(100, ratio * 100));
-    ui.ring.style.strokeDashoffset = String(100 - pct);
-    if (ratio == null) ui.mark?.classList.add('is-indeterminate');
-    else ui.mark?.classList.remove('is-indeterminate');
+    const ringPct = pct == null ? 12 : Math.max(0, Math.min(100, pct));
+    ui.ring.style.strokeDashoffset = String(100 - ringPct);
   }
 }
 
 function clearProgress(ui: ProgressUi, finalText?: string) {
   ui.mark?.classList.remove('is-downloading', 'is-indeterminate', 'is-firing');
   if (ui.ring) ui.ring.style.strokeDashoffset = '100';
-  if (ui.label) {
+  if (ui.fill) ui.fill.style.width = '0%';
+  if (ui.meta) {
     if (finalText) {
-      ui.label.hidden = false;
-      ui.label.textContent = finalText;
+      ui.meta.hidden = false;
+      if (ui.pctEl) ui.pctEl.textContent = '✓';
+      if (ui.detailEl) ui.detailEl.textContent = finalText;
+      if (ui.fill) ui.fill.style.width = '100%';
     } else {
-      ui.label.hidden = true;
-      ui.label.textContent = '';
+      ui.meta.hidden = true;
+      if (ui.pctEl) ui.pctEl.textContent = '0%';
+      if (ui.detailEl) ui.detailEl.textContent = '';
     }
   }
   if (ui.button) {
@@ -177,9 +232,12 @@ function clearProgress(ui: ProgressUi, finalText?: string) {
   }
 }
 
-async function fetchDmgBlob(url: string, onProgress: (ratio: number | null) => void): Promise<Blob> {
+async function fetchDmgBlob(
+  url: string,
+  onProgress: (transfer: TransferProgress | 'indeterminate') => void,
+): Promise<Blob> {
   if (cachedBlob && cachedUrl === url) {
-    onProgress(1);
+    onProgress({ received: 1, total: 1, bytesPerSec: null });
     return cachedBlob;
   }
 
@@ -190,7 +248,7 @@ async function fetchDmgBlob(url: string, onProgress: (ratio: number | null) => v
   const total = Number(res.headers.get('Content-Length') || '0');
   if (!res.body) {
     const blob = await res.blob();
-    onProgress(1);
+    onProgress({ received: blob.size, total: blob.size || total, bytesPerSec: null });
     cachedBlob = blob;
     cachedUrl = url;
     return blob;
@@ -199,13 +257,31 @@ async function fetchDmgBlob(url: string, onProgress: (ratio: number | null) => v
   const reader = res.body.getReader();
   const chunks: Uint8Array[] = [];
   let received = 0;
+  const started = performance.now();
+  let lastTick = started;
+  let lastBytes = 0;
+  let bytesPerSec: number | null = null;
+
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
     if (value) {
       chunks.push(value);
       received += value.byteLength;
-      onProgress(total > 0 ? received / total : null);
+      const now = performance.now();
+      const dt = now - lastTick;
+      if (dt >= 200) {
+        bytesPerSec = ((received - lastBytes) * 1000) / dt;
+        lastTick = now;
+        lastBytes = received;
+      } else if (bytesPerSec == null && now > started + 80) {
+        bytesPerSec = (received * 1000) / Math.max(1, now - started);
+      }
+      onProgress(
+        total > 0
+          ? { received, total, bytesPerSec }
+          : { received, total: 0, bytesPerSec },
+      );
     }
   }
 
@@ -219,7 +295,7 @@ async function fetchDmgBlob(url: string, onProgress: (ratio: number | null) => v
   const blob = new Blob([merged], { type: 'application/x-apple-diskimage' });
   cachedBlob = blob;
   cachedUrl = url;
-  onProgress(1);
+  onProgress({ received, total: total > 0 ? total : received, bytesPerSec });
   return blob;
 }
 
@@ -258,20 +334,29 @@ export async function startInPageDownload(opts: {
 
   try {
     const fromCache = Boolean(cachedBlob && cachedUrl === url);
-    setProgress(ui, fromCache ? 1 : 0, fromCache ? 'Ready — saving…' : 'Downloading… 0%');
+    if (fromCache) {
+      setProgress(ui, 'done', 'Ready — saving…');
+      button.textContent = 'Saving…';
+    } else {
+      setProgress(ui, 'indeterminate', 'Connecting…');
+      button.textContent = 'Downloading…';
+    }
 
-    const blob = await fetchDmgBlob(url, (ratio) => {
-      if (ratio == null) {
-        setProgress(ui, null, 'Downloading…');
+    const blob = await fetchDmgBlob(url, (transfer) => {
+      if (transfer === 'indeterminate') {
+        setProgress(ui, 'indeterminate', 'Downloading…');
         button.textContent = 'Downloading…';
         return;
       }
-      const pct = Math.round(ratio * 100);
-      setProgress(ui, ratio, `Downloading… ${pct}%`);
-      button.textContent = `${pct}%`;
+      setProgress(ui, transfer);
+      if (transfer.total > 0) {
+        button.textContent = `${Math.round((transfer.received / transfer.total) * 100)}%`;
+      } else {
+        button.textContent = formatBytes(transfer.received);
+      }
     });
 
-    setProgress(ui, 1, 'Saving…');
+    setProgress(ui, 'done', 'Saving to Downloads…');
     button.textContent = 'Saving…';
     saveBlob(blob, filename);
 
@@ -283,8 +368,8 @@ export async function startInPageDownload(opts: {
     clearProgress(ui, 'Saved to your downloads');
     button.textContent = 'Download again';
     window.setTimeout(() => {
-      if (ui.label && ui.label.textContent === 'Saved to your downloads') {
-        ui.label.hidden = true;
+      if (ui.detailEl && ui.detailEl.textContent === 'Saved to your downloads') {
+        if (ui.meta) ui.meta.hidden = true;
       }
       if (ui.button && ui.button.textContent === 'Download again') {
         ui.button.textContent = ui.idleLabel;
