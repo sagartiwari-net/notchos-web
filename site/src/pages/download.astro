@@ -1,63 +1,77 @@
 ---
 import Simple from '../layouts/Simple.astro';
 import { APP_VERSION, DMG_FILENAME, DMG_PATH } from '../lib/download';
-import fs from 'node:fs';
-import path from 'node:path';
-
-/** Best-effort size for the download CTA (bytes → human). */
-function formatBytes(n: number): string {
-  if (!Number.isFinite(n) || n <= 0) return '';
-  const mb = n / (1024 * 1024);
-  if (mb >= 10) return `${mb.toFixed(0)} MB`;
-  return `${mb.toFixed(1)} MB`;
-}
-
-const candidates = [
-  path.resolve(`public/downloads/${DMG_FILENAME}`),
-  path.resolve(`../public/downloads/${DMG_FILENAME}`),
-  // Local Mac artifact while building the site before server fetch-dmg.
-  path.resolve(`../../Lumen/dist/NotchOS-${APP_VERSION}.dmg`),
-];
-let dmgBytes = 0;
-for (const p of candidates) {
-  try {
-    dmgBytes = fs.statSync(p).size;
-    if (dmgBytes > 0) break;
-  } catch {
-    /* try next */
-  }
-}
-const dmgSizeLabel = formatBytes(dmgBytes) || '~5.1 MB';
 ---
 
 <Simple title="Download NotchOS" description="Download NotchOS for Apple silicon Macs running macOS 26 or later.">
-  <h1 class="simple__title">Download</h1>
-  <p class="simple__lead">
-    Get the Mac app, then start the 7-day trial inside NotchOS — or activate with the email + key from your
-    purchase.
-  </p>
-  <p class="simple__actions">
-    <a class="btn btn--primary" href={DMG_PATH} download={DMG_FILENAME}>Download NotchOS {APP_VERSION} (.dmg)</a>
-  </p>
-  <p class="simple__note">
-    File size about <strong>{dmgSizeLabel}</strong>. This link always serves the latest build — old emails and
-    bookmarks keep working when we ship a new version. If Chrome says “Resuming…”, cancel that entry and start
-    again so total size and time remaining show correctly.
-  </p>
-  <p class="simple__actions">
-    <a class="btn btn--ghost" href="/trial">Start free trial (email me the link)</a>
-  </p>
-  <ol class="simple__steps">
-    <li>Open the DMG and drag NotchOS to Applications.</li>
-    <li>
-      On macOS Sequoia+, if Gatekeeper blocks the first open: System Settings → Privacy &amp; Security → Open
-      Anyway (not Right-click → Open).
-    </li>
-    <li>Launch NotchOS. Start the 7-day trial, or Activate with email + key after purchase.</li>
-  </ol>
-  <p class="simple__note">
-    Requires Apple silicon and macOS 26 or later. Direct file:
-    <a href={DMG_PATH}><code>{DMG_PATH}</code></a>
-  </p>
-  <p class="simple__actions"><a class="btn btn--ghost" href="/#pricing">See pricing</a></p>
+  <div class="gate" id="gate-download" data-gate-root>
+    <div class="gate__stage">
+      <p class="gate__kicker" data-gate-enter>Get the Mac app</p>
+      <p class="gate__brand" data-gate-enter>Notch<em>OS</em></p>
+      <h1 class="gate__title" data-gate-enter>Download for Apple silicon</h1>
+      <p class="gate__lead" data-gate-enter>
+        Install the DMG, then start the 7-day trial inside NotchOS — or activate with the email + key from
+        your purchase. This link always serves the latest build.
+      </p>
+
+      <div class="gate__mark" data-gate-island data-gate-enter aria-hidden="true">
+        <div class="gate__mark-glow"></div>
+        <img
+          class="gate__mark-icon"
+          src="/notchos-icon.svg"
+          width="128"
+          height="128"
+          alt=""
+          decoding="async"
+        />
+        <div class="gate__island-ring"></div>
+        <p class="gate__mark-caption">NotchOS.dmg · {APP_VERSION}</p>
+      </div>
+
+      <div class="gate__actions gate__actions--center" data-gate-enter>
+        <a
+          class="btn btn--primary"
+          href={DMG_PATH}
+          download={DMG_FILENAME}
+          data-gate-download
+          id="gate-download-btn"
+        >
+          Download
+        </a>
+        <a class="btn btn--ghost" href="/trial">Email me the link</a>
+      </div>
+
+      <ol class="gate__steps" data-gate-enter>
+        <li>
+          <span class="gate__step-num">1</span>
+          <span>Open the DMG and drag NotchOS to Applications.</span>
+        </li>
+        <li>
+          <span class="gate__step-num">2</span>
+          <span>
+            On macOS Sequoia+, if Gatekeeper blocks: System Settings → Privacy &amp; Security → Open Anyway.
+          </span>
+        </li>
+        <li>
+          <span class="gate__step-num">3</span>
+          <span>Launch NotchOS. Start the 7-day trial, or Activate with email + key after purchase.</span>
+        </li>
+      </ol>
+
+      <div class="gate__foot" data-gate-enter>
+        <p class="gate__note">Requires Apple silicon and macOS 26 or later.</p>
+        <a class="btn btn--ghost" href="/#pricing">See pricing</a>
+      </div>
+    </div>
+  </div>
 </Simple>
+
+<script>
+  import { bindDownloadClicks, playGateEnter } from '../lib/gate-motion';
+
+  const root = document.getElementById('gate-download');
+  if (root) {
+    playGateEnter(root);
+    bindDownloadClicks(root);
+  }
+</script>

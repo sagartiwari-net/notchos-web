@@ -9,7 +9,7 @@ set -euo pipefail
 #   GH_TOKEN=ghp_xxx bash deploy/fetch-dmg.sh   # if the release URL is private
 #   VERSION=0.8.33 bash deploy/fetch-dmg.sh     # override release version
 
-VERSION="${VERSION:-0.8.34}"
+VERSION="${VERSION:-0.8.35}"
 TAG="v${VERSION}-staging"
 NAME="NotchOS-${VERSION}.dmg"
 DIR=/www/wwwroot/notch.sagartiwari.net/public/downloads

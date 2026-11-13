@@ -1,0 +1,357 @@
+/*
+ * Download + trial “get” pages — one composition, notch-forward motion stage.
+ * Light theme tokens come from compare-theme.css; keep accent cool blue only.
+ */
+
+/* Simple layout is ~640px; give get-pages a bit more room for the stage. */
+.simple:has(.gate) {
+  max-width: 760px;
+}
+
+.gate {
+  position: relative;
+  max-width: 720px;
+  padding-block: 0 24px;
+}
+
+.gate__stage {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(28px, 5vw, 40px) clamp(20px, 4vw, 36px) clamp(32px, 5vw, 44px);
+  border-radius: 28px;
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgb(56 140 255 / 0.16) 0%, transparent 55%),
+    radial-gradient(80% 60% at 100% 100%, rgb(64 217 199 / 0.08) 0%, transparent 50%),
+    linear-gradient(180deg, #fbfbfa 0%, #f3f3f1 100%);
+  border: 1px solid rgb(17 17 19 / 0.08);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.8) inset,
+    0 24px 60px rgb(17 17 19 / 0.06);
+  overflow: hidden;
+}
+
+.gate__stage::before {
+  content: '';
+  position: absolute;
+  inset: -20% 20% auto;
+  height: 180px;
+  background: radial-gradient(ellipse at center, rgb(56 140 255 / 0.22), transparent 70%);
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gate__brand {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 14px;
+  font-family: var(--font-rounded);
+  font-size: clamp(34px, 6vw, 48px);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  color: var(--color-ink);
+}
+
+.gate__brand em {
+  font-style: normal;
+  color: var(--cmp-accent-text);
+}
+
+.gate__kicker {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cmp-accent-text);
+}
+
+.gate__title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 12px;
+  font-size: clamp(26px, 4.2vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.gate__lead {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 28px;
+  max-width: 36em;
+  color: var(--color-ink-2);
+  line-height: 1.55;
+  font-size: 15.5px;
+}
+
+/* Real NotchOS app icon (same mark as Mac / favicon) — not a fake pill. */
+.gate__mark {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 200px);
+  margin: 0 auto 28px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.gate__mark-glow {
+  position: absolute;
+  top: 18px;
+  width: 100px;
+  height: 100px;
+  border-radius: 28px;
+  background: radial-gradient(circle, rgb(56 140 255 / 0.16) 0%, transparent 72%);
+  filter: blur(22px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gate__mark-icon {
+  position: relative;
+  z-index: 1;
+  width: 128px;
+  height: 128px;
+  border-radius: 28px;
+  display: block;
+  object-fit: cover;
+  background: #0a0a0a;
+  box-shadow:
+    0 18px 40px rgb(17 17 19 / 0.28),
+    0 0 0 1px rgb(17 17 19 / 0.12);
+}
+
+.gate__mark-caption {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-rounded);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-2);
+}
+
+.gate__island-ring {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 128px;
+  height: 128px;
+  border-radius: 30px;
+  border: 1.5px solid rgb(56 140 255 / 0);
+  pointer-events: none;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.gate__mark.is-firing .gate__island-ring {
+  border-color: rgb(56 140 255 / 0.55);
+}
+
+.gate__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 28px;
+}
+
+.gate__actions--center {
+  justify-content: center;
+}
+
+.gate__actions .btn {
+  min-height: 46px;
+  min-width: 148px;
+  padding-inline: 22px;
+  border-radius: 999px;
+  font-weight: 650;
+  justify-content: center;
+}
+
+.gate__meta {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 28px;
+  font-size: 13px;
+  color: var(--color-ink-3);
+  max-width: 40em;
+}
+
+.gate__steps {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.gate__steps li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+  color: var(--color-ink-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.gate__step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cmp-accent-text);
+  background: var(--cmp-accent-soft);
+}
+
+.gate__foot {
+  position: relative;
+  z-index: 1;
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.gate__note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-ink-3);
+}
+
+.gate__note a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Trial form */
+.gate__form {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.gate__label {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--color-ink-2);
+}
+
+.gate__input {
+  appearance: none;
+  width: 100%;
+  border: 1px solid var(--cmp-border-strong);
+  background: #fff;
+  color: var(--color-ink);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gate__input:focus-visible {
+  outline: none;
+  border-color: var(--cmp-accent);
+  box-shadow: 0 0 0 4px var(--cmp-accent-soft);
+}
+
+.gate__hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.gate__status {
+  margin: 0;
+  min-height: 1.3em;
+  font-size: 13.5px;
+  color: var(--color-ink-2);
+}
+
+.gate__status[data-kind='ok'] {
+  color: var(--cmp-good);
+}
+
+.gate__status[data-kind='error'] {
+  color: var(--cmp-bad);
+}
+
+.gate__status[data-kind='pending'] {
+  color: var(--color-ink-3);
+}
+
+.gate__success {
+  position: relative;
+  z-index: 1;
+  display: none;
+  margin-bottom: 22px;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  background: rgb(21 117 50 / 0.08);
+  border: 1px solid rgb(21 117 50 / 0.18);
+}
+
+.gate__success.is-open {
+  display: block;
+}
+
+.gate__success-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--cmp-good);
+}
+
+.gate__success-copy {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--color-ink-2);
+  line-height: 1.45;
+}
+
+.gate__burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.gate__burst span {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--cmp-accent);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gate__island-ring,
+  .gate__burst span,
+  .gate__mark-glow {
+    transition: none !important;
+  }
+}

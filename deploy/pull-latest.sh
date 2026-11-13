@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-VERSION="${VERSION:-0.8.34}"
+VERSION="${VERSION:-0.8.35}"
 STABLE_URL="https://notch.sagartiwari.net/downloads/NotchOS.dmg"
 ENV_FILE=/www/server/notchos/api.env
 

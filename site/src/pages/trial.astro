@@ -1,61 +1,117 @@
 ---
 import Simple from '../layouts/Simple.astro';
+import { APP_VERSION, DMG_PATH } from '../lib/download';
 ---
 
 <Simple
   title="Start your NotchOS free trial"
   description="Enter your email to get the NotchOS download link, then start the 7-day trial in the Mac app. No card."
 >
-  <h1 class="simple__title">Start free trial</h1>
-  <p class="simple__lead">
-    Enter your email for the download link. The <strong>7-day trial starts inside the Mac app</strong> (not on this
-    page) and locks to that Mac — one trial per device.
-  </p>
+  <div class="gate" id="gate-trial" data-gate-root>
+    <div class="gate__stage">
+      <p class="gate__kicker" data-gate-enter>7-day trial · no card</p>
+      <p class="gate__brand" data-gate-enter>Notch<em>OS</em></p>
+      <h1 class="gate__title" data-gate-enter>Start free trial</h1>
+      <p class="gate__lead" data-gate-enter>
+        Enter your email for the download link. The <strong>7-day trial starts inside the Mac app</strong> (not
+        on this page) and locks to that Mac — one trial per device.
+      </p>
 
-  <form class="simple__form" id="trial-lead-form" novalidate>
-    <label class="simple__label" for="trial-email">Email</label>
-    <input
-      class="simple__input"
-      id="trial-email"
-      name="email"
-      type="email"
-      autocomplete="email"
-      required
-      placeholder="you@email.com"
-    />
-    {/* Honeypot — leave empty */}
-    <input class="simple__hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
-    <button class="btn btn--primary" type="submit" id="trial-submit">Email me the download link</button>
-    <p class="simple__status" id="trial-status" role="status" aria-live="polite"></p>
-    <p id="trial-download-wrap" hidden>
-      <a class="btn btn--primary" id="trial-download" href="/downloads/NotchOS.dmg">Download NotchOS now</a>
-    </p>
-  </form>
+      <div class="gate__mark" data-gate-island data-gate-enter aria-hidden="true">
+        <div class="gate__mark-glow"></div>
+        <img
+          class="gate__mark-icon"
+          src="/notchos-icon.svg"
+          width="128"
+          height="128"
+          alt=""
+          decoding="async"
+        />
+        <div class="gate__island-ring"></div>
+        <p class="gate__mark-caption">Trial · {APP_VERSION}</p>
+      </div>
 
-  <ol class="simple__steps">
-    <li>Download and open the DMG → drag NotchOS to Applications.</li>
-    <li>
-      On macOS Sequoia+, if Gatekeeper blocks: System Settings → Privacy &amp; Security → Open Anyway.
-    </li>
-    <li>Launch NotchOS → tap <strong>Start free trial</strong> (needs internet once). That creates the Trials row.</li>
-  </ol>
-  <p class="simple__note">
-    Temporary / disposable inboxes are blocked. Requires Apple silicon and macOS 26 or later.
-    Already have a key? <a href="/download">Download</a> or <a href="/recover">Recover key</a>.
-  </p>
-  <p class="simple__actions">
-    <a class="btn btn--ghost" href="/download">Download without email</a>
-    <a class="btn btn--ghost" href="/#pricing">See pricing</a>
-  </p>
+      <form class="gate__form" id="trial-lead-form" data-gate-enter novalidate>
+        <label class="gate__label" for="trial-email">Email</label>
+        <input
+          class="gate__input"
+          id="trial-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="you@email.com"
+        />
+        {/* Honeypot — leave empty */}
+        <input class="gate__hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="gate__actions" style="margin-bottom: 0">
+          <button class="btn btn--primary" type="submit" id="trial-submit">Email me the download link</button>
+        </div>
+        <p class="gate__status" id="trial-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="gate__success" id="trial-success" hidden>
+        <p class="gate__success-title" id="trial-success-title">You’re set</p>
+        <p class="gate__success-copy" id="trial-success-copy">
+          We queued your download email. You can also grab the app now — trial still starts only after you tap
+          Start free trial in NotchOS.
+        </p>
+        <div class="gate__actions" style="margin-bottom: 0">
+          <a class="btn btn--primary" id="trial-download" href={DMG_PATH} data-gate-download>
+            Download NotchOS now
+          </a>
+        </div>
+      </div>
+
+      <ol class="gate__steps" data-gate-enter>
+        <li>
+          <span class="gate__step-num">1</span>
+          <span>Download and open the DMG → drag NotchOS to Applications.</span>
+        </li>
+        <li>
+          <span class="gate__step-num">2</span>
+          <span>
+            On macOS Sequoia+, if Gatekeeper blocks: System Settings → Privacy &amp; Security → Open Anyway.
+          </span>
+        </li>
+        <li>
+          <span class="gate__step-num">3</span>
+          <span>
+            Launch NotchOS → tap <strong>Start free trial</strong> (needs internet once). That creates the Trials
+            row.
+          </span>
+        </li>
+      </ol>
+
+      <div class="gate__foot" data-gate-enter>
+        <p class="gate__note">
+          Temporary / disposable inboxes are blocked. Requires Apple silicon and macOS 26 or later. Already have
+          a key? <a href="/download">Download</a> or <a href="/recover">Recover key</a>.
+        </p>
+        <a class="btn btn--ghost" href="/download">Download without email</a>
+        <a class="btn btn--ghost" href="/#pricing">See pricing</a>
+      </div>
+    </div>
+  </div>
 </Simple>
 
 <script>
+  import { bindDownloadClicks, playGateEnter, playTrialSuccess } from '../lib/gate-motion';
+
+  const root = document.getElementById('gate-trial');
   const form = document.getElementById('trial-lead-form');
   const emailInput = document.getElementById('trial-email');
   const statusEl = document.getElementById('trial-status');
   const submitBtn = document.getElementById('trial-submit');
-  const downloadWrap = document.getElementById('trial-download-wrap');
+  const success = document.getElementById('trial-success');
+  const successTitle = document.getElementById('trial-success-title');
+  const successCopy = document.getElementById('trial-success-copy');
   const downloadLink = document.getElementById('trial-download');
+
+  if (root) {
+    playGateEnter(root);
+    bindDownloadClicks(root);
+  }
 
   if (
     form instanceof HTMLFormElement &&
@@ -68,10 +124,18 @@ import Simple from '../layouts/Simple.astro';
       statusEl.dataset.kind = kind;
     };
 
-    const showDownload = (url) => {
-      if (!(downloadWrap instanceof HTMLElement) || !(downloadLink instanceof HTMLAnchorElement)) return;
-      if (typeof url === 'string' && url !== '') downloadLink.href = url;
-      downloadWrap.hidden = false;
+    const revealSuccess = (url, title, copy) => {
+      if (typeof url === 'string' && url !== '' && downloadLink instanceof HTMLAnchorElement) {
+        downloadLink.href = url;
+      }
+      if (successTitle) successTitle.textContent = title;
+      if (successCopy) successCopy.textContent = copy;
+      playTrialSuccess({
+        form,
+        success,
+        downloadBtn: downloadLink,
+      });
+      bindDownloadClicks(success ?? document);
     };
 
     form.addEventListener('submit', async (event) => {
@@ -86,7 +150,6 @@ import Simple from '../layouts/Simple.astro';
       const company = new FormData(form).get('company');
       submitBtn.disabled = true;
       setStatus('Sending…', 'pending');
-      if (downloadWrap instanceof HTMLElement) downloadWrap.hidden = true;
 
       try {
         const res = await fetch('/api/trial-lead', {
@@ -106,20 +169,29 @@ import Simple from '../layouts/Simple.astro';
         }
 
         if (body.status === 'has_license') {
-          setStatus('This email already has a NotchOS license. Use Recover key if you need it resent.', 'ok');
-          showDownload(body.download_url);
+          setStatus('', 'ok');
+          revealSuccess(
+            body.download_url,
+            'License already on this email',
+            'Use Recover key if you need the key resent. You can still download the latest app below.',
+          );
           return;
         }
         if (body.status === 'resent') {
-          setStatus('Link ready. If mail is not set up yet, use Download below — then start the trial in the app.', 'ok');
-          showDownload(body.download_url);
+          setStatus('', 'ok');
+          revealSuccess(
+            body.download_url,
+            'Link ready again',
+            'Check your inbox if mail is configured — or download now. Trial starts only in the Mac app.',
+          );
           return;
         }
-        setStatus(
-          'Link ready. Check email if configured; otherwise use Download below. Trial starts only after you tap Start free trial in the app.',
-          'ok',
+        setStatus('', 'ok');
+        revealSuccess(
+          body.download_url,
+          'You’re set',
+          'We queued your download email. Grab the app now if you like — trial starts after Start free trial in NotchOS.',
         );
-        showDownload(body.download_url);
       } catch {
         setStatus('Could not reach the server. Try again in a moment.', 'error');
       } finally {
