@@ -44,6 +44,15 @@ cp -f "$VERSIONED" "$STABLE"
 chown www:www "$VERSIONED" "$STABLE"
 chmod 644 "$VERSIONED" "$STABLE"
 
+# Apache: never let browsers keep a stale NotchOS.dmg after an in-place overwrite.
+cat > "${DIR}/.htaccess" <<'HTA'
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-cache, must-revalidate"
+</IfModule>
+HTA
+chown www:www "${DIR}/.htaccess" 2>/dev/null || true
+chmod 644 "${DIR}/.htaccess"
+
 ls -lh "$DIR"
 echo "Stable URL:"
 curl -sSIL "https://notch.sagartiwari.net/downloads/NotchOS.dmg" | head -15
