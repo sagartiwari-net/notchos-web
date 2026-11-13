@@ -183,7 +183,8 @@ async function fetchDmgBlob(url: string, onProgress: (ratio: number | null) => v
     return cachedBlob;
   }
 
-  const res = await fetch(url, { credentials: 'same-origin', cache: 'force-cache' });
+  // Never force-cache the stable DMG URL — version bumps overwrite the same path.
+  const res = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
   if (!res.ok) throw new Error(`Download failed (${res.status})`);
 
   const total = Number(res.headers.get('Content-Length') || '0');
