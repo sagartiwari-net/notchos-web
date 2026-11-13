@@ -5,7 +5,7 @@
  * current build. Versioned DMGs may still exist on disk for archives; do not link them
  * from the site or mail.
  */
-export const APP_VERSION = '0.8.33';
+export const APP_VERSION = '0.8.34';
 
 /** Stable path under the site origin — always the latest DMG. */
 export const DMG_PATH = '/downloads/NotchOS.dmg';
