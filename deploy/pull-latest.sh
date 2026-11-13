@@ -1,26 +1,34 @@
 #!/usr/bin/env bash
 # One-shot update on the VPS (aaPanel Terminal / SSH as root):
 #   cd /www/wwwroot/notch.sagartiwari.net && bash deploy/pull-latest.sh
+#   VERSION=0.8.35 bash deploy/pull-latest.sh   # optional override
+#
+# After git pull we re-exec this file so VERSION defaults match the just-pulled
+# script (running bash keeps the old in-memory copy otherwise).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-VERSION="${VERSION:-0.8.35}"
 STABLE_URL="https://notch.sagartiwari.net/downloads/NotchOS.dmg"
 ENV_FILE=/www/server/notchos/api.env
 
-echo "==> git pull"
-git fetch origin main
-git checkout main
-git pull --ff-only origin main
+if [[ "${1:-}" != "--after-pull" ]]; then
+  echo "==> git pull"
+  git fetch origin main
+  git checkout main
+  git pull --ff-only origin main
+  chmod +x deploy/reset-server.sh deploy/fetch-dmg.sh deploy/pull-latest.sh
+  echo "==> re-exec updated pull-latest.sh"
+  exec bash "$ROOT/deploy/pull-latest.sh" --after-pull
+fi
 
-chmod +x deploy/reset-server.sh deploy/fetch-dmg.sh deploy/pull-latest.sh
+VERSION="${VERSION:-0.8.35}"
 
 echo "==> build + migrate + restart API"
 ./deploy/reset-server.sh
 
-echo "==> publish DMG as NotchOS.dmg (always latest)"
+echo "==> publish DMG as NotchOS.dmg (always latest) — ${VERSION}"
 VERSION="$VERSION" bash deploy/fetch-dmg.sh
 
 if [[ -f "$ENV_FILE" ]]; then
@@ -34,7 +42,6 @@ if [[ -f "$ENV_FILE" ]]; then
   systemctl restart notchos-api || true
 fi
 
-# Prefer settings table if present (admin override).
 if command -v mysql >/dev/null 2>&1 && [[ -f "$ENV_FILE" ]]; then
   # shellcheck disable=SC1090
   set -a; source "$ENV_FILE"; set +a
@@ -45,7 +52,7 @@ INSERT INTO settings (name, value) VALUES ('download_url', '${STABLE_URL}')
 INSERT INTO settings (name, value) VALUES ('app_version', '${VERSION}')
   ON DUPLICATE KEY UPDATE value=VALUES(value);
 SQL
-    echo "==> settings.download_url + app_version updated"
+    echo "==> settings.download_url + app_version updated (${VERSION})"
   fi
 fi
 
@@ -54,4 +61,4 @@ echo "Verify:"
 curl -sSIL "$STABLE_URL" | head -12
 curl -sS https://notch.sagartiwari.net/v1/health || true
 echo
-echo "Done. Site download page should link to /downloads/NotchOS.dmg"
+echo "Done. Site download page should link to /downloads/NotchOS.dmg (${VERSION})"
