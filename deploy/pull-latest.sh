@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-shot update on the VPS (aaPanel Terminal / SSH as root):
 #   cd /www/wwwroot/notch.sagartiwari.net && bash deploy/pull-latest.sh
-#   VERSION=0.8.35 bash deploy/pull-latest.sh   # optional override
+#   VERSION=0.8.37 bash deploy/pull-latest.sh   # optional override
 #
 # After git pull we re-exec this file so VERSION defaults match the just-pulled
 # script (running bash keeps the old in-memory copy otherwise).
@@ -23,7 +23,7 @@ if [[ "${1:-}" != "--after-pull" ]]; then
   exec bash "$ROOT/deploy/pull-latest.sh" --after-pull
 fi
 
-VERSION="${VERSION:-0.8.35}"
+VERSION="${VERSION:-0.8.37}"
 
 echo "==> build + migrate + restart API"
 ./deploy/reset-server.sh
