@@ -3,11 +3,15 @@ import { gsap } from 'gsap';
 const reduceMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/** Cached DMG blob so a second click saves instantly. */
+let cachedBlob: Blob | null = null;
+let cachedUrl = '';
+let downloadBusy = false;
+
 /** Entrance for download / trial gate pages. */
 export function playGateEnter(root: HTMLElement) {
   const items = root.querySelectorAll('[data-gate-enter]');
   if (!items.length || reduceMotion()) return;
-  // Animate only transform — never opacity (avoids stuck half-faded text if the tween is interrupted).
   gsap.from(items, {
     y: 16,
     duration: 0.5,
@@ -18,8 +22,7 @@ export function playGateEnter(root: HTMLElement) {
 }
 
 /**
- * Download click: pulse the notch island, then follow the link.
- * Returns a promise that resolves when the animation finishes (or immediately if reduced).
+ * Download click pulse on the app mark (short; progress UI runs in parallel).
  */
 export function playDownloadStart(opts: {
   island?: HTMLElement | null;
@@ -29,44 +32,26 @@ export function playDownloadStart(opts: {
   if (reduceMotion()) return Promise.resolve();
 
   return new Promise((resolve) => {
-    const tl = gsap.timeline({
-      onComplete: () => resolve(),
-    });
+    const tl = gsap.timeline({ onComplete: () => resolve() });
 
     if (button) {
-      tl.to(button, { scale: 0.96, duration: 0.12, ease: 'power2.out' }, 0).to(
+      tl.to(button, { scale: 0.96, duration: 0.1, ease: 'power2.out' }, 0).to(
         button,
-        { scale: 1, duration: 0.28, ease: 'back.out(2.2)' },
-        0.12,
+        { scale: 1, duration: 0.22, ease: 'back.out(2)' },
+        0.1,
       );
     }
 
     if (island) {
       island.classList.add('is-firing');
-      const ring = island.querySelector('.gate__island-ring');
       tl.fromTo(
         island,
         { scale: 1 },
-        { scale: 1.04, duration: 0.22, yoyo: true, repeat: 1, ease: 'power2.inOut' },
+        { scale: 1.03, duration: 0.18, yoyo: true, repeat: 1, ease: 'power2.inOut' },
         0,
       );
-      if (ring) {
-        tl.fromTo(
-          ring,
-          { scale: 0.92, opacity: 0, borderColor: 'rgba(56,140,255,0)' },
-          {
-            scale: 1.08,
-            opacity: 1,
-            borderColor: 'rgba(56,140,255,0.65)',
-            duration: 0.45,
-            ease: 'power2.out',
-          },
-          0,
-        ).to(ring, { opacity: 0, duration: 0.25, ease: 'power1.in' }, 0.4);
-      }
-      spawnBurst(island, tl, 0.05);
     } else {
-      tl.to({}, { duration: 0.35 });
+      tl.to({}, { duration: 0.2 });
     }
   });
 }
@@ -136,26 +121,204 @@ function spawnBurst(host: HTMLElement, tl: gsap.core.Timeline, at: number) {
       ease: 'power2.out',
     },
     at,
-  ).to(
-    bits,
-    { opacity: 0, duration: 0.3, ease: 'power1.in' },
-    at + 0.4,
-  );
+  ).to(bits, { opacity: 0, duration: 0.3, ease: 'power1.in' }, at + 0.4);
 }
 
-/** Wire every [data-gate-download] link to play motion before navigating. */
+type ProgressUi = {
+  mark: HTMLElement | null;
+  ring: SVGCircleElement | null;
+  label: HTMLElement | null;
+  button: HTMLButtonElement | HTMLAnchorElement | null;
+  idleLabel: string;
+};
+
+function progressUi(button: HTMLElement): ProgressUi {
+  const mark = document.querySelector<HTMLElement>('[data-gate-island]');
+  return {
+    mark,
+    ring: mark?.querySelector<SVGCircleElement>('[data-gate-progress-bar]') ?? null,
+    label: mark?.querySelector<HTMLElement>('[data-gate-progress-label]') ?? null,
+    button: button as HTMLButtonElement | HTMLAnchorElement,
+    idleLabel: button.textContent?.trim() || 'Download',
+  };
+}
+
+function setProgress(ui: ProgressUi, ratio: number | null, text: string) {
+  ui.mark?.classList.add('is-downloading');
+  if (ui.label) {
+    ui.label.hidden = false;
+    ui.label.textContent = text;
+  }
+  if (ui.ring) {
+    const pct = ratio == null ? 8 : Math.max(0, Math.min(100, ratio * 100));
+    ui.ring.style.strokeDashoffset = String(100 - pct);
+    if (ratio == null) ui.mark?.classList.add('is-indeterminate');
+    else ui.mark?.classList.remove('is-indeterminate');
+  }
+}
+
+function clearProgress(ui: ProgressUi, finalText?: string) {
+  ui.mark?.classList.remove('is-downloading', 'is-indeterminate', 'is-firing');
+  if (ui.ring) ui.ring.style.strokeDashoffset = '100';
+  if (ui.label) {
+    if (finalText) {
+      ui.label.hidden = false;
+      ui.label.textContent = finalText;
+    } else {
+      ui.label.hidden = true;
+      ui.label.textContent = '';
+    }
+  }
+  if (ui.button) {
+    if (ui.button instanceof HTMLButtonElement) ui.button.disabled = false;
+    else ui.button.removeAttribute('aria-busy');
+    ui.button.classList.remove('is-busy');
+    if ('textContent' in ui.button) ui.button.textContent = ui.idleLabel;
+  }
+}
+
+async function fetchDmgBlob(url: string, onProgress: (ratio: number | null) => void): Promise<Blob> {
+  if (cachedBlob && cachedUrl === url) {
+    onProgress(1);
+    return cachedBlob;
+  }
+
+  const res = await fetch(url, { credentials: 'same-origin', cache: 'force-cache' });
+  if (!res.ok) throw new Error(`Download failed (${res.status})`);
+
+  const total = Number(res.headers.get('Content-Length') || '0');
+  if (!res.body) {
+    const blob = await res.blob();
+    onProgress(1);
+    cachedBlob = blob;
+    cachedUrl = url;
+    return blob;
+  }
+
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) {
+      chunks.push(value);
+      received += value.byteLength;
+      onProgress(total > 0 ? received / total : null);
+    }
+  }
+
+  // Concatenate without spreading huge arrays into Blob constructor awkwardly.
+  const merged = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  const blob = new Blob([merged], { type: 'application/x-apple-diskimage' });
+  cachedBlob = blob;
+  cachedUrl = url;
+  onProgress(1);
+  return blob;
+}
+
+function saveBlob(blob: Blob, filename: string) {
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 4_000);
+}
+
+/**
+ * In-page animated download: fetch DMG with progress around the logo, then save the blob.
+ * Falls back to a normal navigation if fetch fails.
+ */
+export async function startInPageDownload(opts: {
+  url: string;
+  filename: string;
+  button: HTMLElement;
+}): Promise<void> {
+  const { url, filename, button } = opts;
+  if (downloadBusy) return;
+  downloadBusy = true;
+
+  const ui = progressUi(button);
+  if (button instanceof HTMLButtonElement) button.disabled = true;
+  else button.setAttribute('aria-busy', 'true');
+  button.classList.add('is-busy');
+  button.textContent = 'Preparing…';
+
+  void playDownloadStart({ island: ui.mark, button });
+
+  try {
+    const fromCache = Boolean(cachedBlob && cachedUrl === url);
+    setProgress(ui, fromCache ? 1 : 0, fromCache ? 'Ready — saving…' : 'Downloading… 0%');
+
+    const blob = await fetchDmgBlob(url, (ratio) => {
+      if (ratio == null) {
+        setProgress(ui, null, 'Downloading…');
+        button.textContent = 'Downloading…';
+        return;
+      }
+      const pct = Math.round(ratio * 100);
+      setProgress(ui, ratio, `Downloading… ${pct}%`);
+      button.textContent = `${pct}%`;
+    });
+
+    setProgress(ui, 1, 'Saving…');
+    button.textContent = 'Saving…';
+    saveBlob(blob, filename);
+
+    if (ui.mark && !reduceMotion()) {
+      const tl = gsap.timeline();
+      spawnBurst(ui.mark, tl, 0);
+    }
+
+    clearProgress(ui, 'Saved to your downloads');
+    button.textContent = 'Download again';
+    window.setTimeout(() => {
+      if (ui.label && ui.label.textContent === 'Saved to your downloads') {
+        ui.label.hidden = true;
+      }
+      if (ui.button && ui.button.textContent === 'Download again') {
+        ui.button.textContent = ui.idleLabel;
+      }
+    }, 3200);
+  } catch {
+    clearProgress(ui);
+    button.textContent = ui.idleLabel;
+    // Last resort: let the browser handle it the classic way.
+    window.location.assign(url);
+  } finally {
+    downloadBusy = false;
+    if (button instanceof HTMLButtonElement) button.disabled = false;
+    else button.removeAttribute('aria-busy');
+    button.classList.remove('is-busy');
+  }
+}
+
+/** Wire every [data-gate-download] link to the in-page animated download. */
 export function bindDownloadClicks(root: ParentNode = document) {
   root.querySelectorAll<HTMLAnchorElement>('[data-gate-download]').forEach((link) => {
     if (link.dataset.gateBound === '1') return;
     link.dataset.gateBound = '1';
-    link.addEventListener('click', (event) => {
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      if (link.target === '_blank') return;
-      event.preventDefault();
-      const island = document.querySelector<HTMLElement>('[data-gate-island]');
-      void playDownloadStart({ island, button: link }).then(() => {
-        window.location.assign(link.href);
-      });
-    });
+    // Capture so we beat the browser's native <a download> handling.
+    link.addEventListener(
+      'click',
+      (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (link.target === '_blank') return;
+        event.preventDefault();
+        event.stopPropagation();
+        const filename = link.getAttribute('download') || 'NotchOS.dmg';
+        void startInPageDownload({ url: link.href, filename, button: link });
+      },
+      true,
+    );
   });
 }

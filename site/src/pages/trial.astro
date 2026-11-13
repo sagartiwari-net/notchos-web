@@ -17,18 +17,32 @@ import { APP_VERSION, DMG_PATH } from '../lib/download';
         on this page) and locks to that Mac — one trial per device.
       </p>
 
-      <div class="gate__mark" data-gate-island data-gate-enter aria-hidden="true">
-        <div class="gate__mark-glow"></div>
-        <img
-          class="gate__mark-icon"
-          src="/notchos-icon.svg"
-          width="128"
-          height="128"
-          alt=""
-          decoding="async"
-        />
-        <div class="gate__island-ring"></div>
+      <div class="gate__mark" data-gate-island data-gate-enter>
+        <div class="gate__mark-glow" aria-hidden="true"></div>
+        <div class="gate__mark-icon-wrap" aria-hidden="true">
+          <img
+            class="gate__mark-icon"
+            src="/notchos-icon.svg"
+            width="128"
+            height="128"
+            alt=""
+            decoding="async"
+          />
+          <svg class="gate__progress" viewBox="0 0 148 148" aria-hidden="true">
+            <circle class="gate__progress-track" cx="74" cy="74" r="68"></circle>
+            <circle
+              class="gate__progress-bar"
+              data-gate-progress-bar
+              cx="74"
+              cy="74"
+              r="68"
+              pathLength="100"
+            ></circle>
+          </svg>
+          <div class="gate__island-ring"></div>
+        </div>
         <p class="gate__mark-caption">Trial · {APP_VERSION}</p>
+        <p class="gate__progress-label" data-gate-progress-label hidden></p>
       </div>
 
       <form class="gate__form" id="trial-lead-form" data-gate-enter novalidate>
